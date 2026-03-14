@@ -10,7 +10,7 @@ export default function SignUpSuccessPage() {
         <CardHeader>
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-4">
             <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">DropShip Pro</span>
+            <span className="text-2xl font-bold text-foreground">Dropfor</span>
           </Link>
           <div className="mx-auto w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
             <CheckCircle className="h-8 w-8 text-accent" />

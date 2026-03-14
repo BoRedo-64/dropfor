@@ -55,7 +55,7 @@ export default function SignUpPage() {
         <CardHeader className="text-center">
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-4">
             <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">DropShip Pro</span>
+            <span className="text-2xl font-bold text-foreground">Dropfor</span>
           </Link>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
