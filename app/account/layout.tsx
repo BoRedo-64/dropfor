@@ -13,29 +13,62 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from '@/components/ui/sidebar'
+
 import {
   LayoutDashboard,
   ShoppingCart,
   CreditCard,
-  Home,
   Package,
+  AlertTriangle,
+  Clock,
+  RotateCcw,
+  Headphones,
+  CheckCircle,
+  Truck,
+  Megaphone,
 } from 'lucide-react'
 
-const sidebarLinks = [
+const sections = [
   {
-    title: 'Dashboard',
-    href: '/account',
-    icon: LayoutDashboard,
+    title: "Général",
+    items: [
+      { title: "Tableau de bord", href: "/account", icon: LayoutDashboard },
+    ],
   },
   {
-    title: 'Orders',
-    href: '/account/orders',
-    icon: ShoppingCart,
+    title: "Commandes",
+    items: [
+      { title: "Toutes les commandes", href: "/account/orders", icon: ShoppingCart },
+      { title: "À vérifier", href: "/account/check", icon: AlertTriangle },
+      { title: "Retour", href: "/account/returns", icon: RotateCcw },
+    ],
   },
   {
-    title: 'Payments',
-    href: '/account/payments',
-    icon: CreditCard,
+    title: "Collecte",
+    items: [
+      { title: "Commandes en attente", href: "/account/pending", icon: Clock },
+      { title: "Pickup", href: "/account/pickup", icon: Package },
+    ],
+  },
+  {
+    title: "Services",
+    items: [
+      { title: "Confirmations", href: "/account/confirmation", icon: CheckCircle },
+      { title: "Fulfillment", href: "/account/fulfillment", icon: Truck },
+      { title: "Marketing", href: "/account/marketing", icon: Megaphone },
+    ],
+  },
+  {
+    title: "Finance",
+    items: [
+      { title: "Paiement", href: "/account/payments", icon: CreditCard },
+    ],
+  },
+  {
+    title: "Support",
+    items: [
+      { title: "Service Client", href: "/account/support", icon: Headphones },
+    ],
   },
 ]
 
@@ -50,84 +83,105 @@ export default function AccountLayout({
     <SidebarProvider>
       <Sidebar collapsible="icon" className="border-r">
 
-        {/* Header */}
-        <SidebarHeader className="border-b">
+        {/* HEADER */}
+        <SidebarHeader>
           <div className="flex items-center gap-4 px-5 py-4">
-            <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-lg">
-              <Package className="h-5 w-5" />
+
+            <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center">
+              <Package className="!h-6 !w-6" />
             </div>
 
             <span className="text-xl font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
               Dropfor
             </span>
+
           </div>
         </SidebarHeader>
 
-        {/* Menu */}
-        <SidebarContent>
-          <SidebarMenu>
-            {sidebarLinks.map((link) => {
-              const isActive = pathname === link.href
-              const Icon = link.icon
+        {/* CONTENT */}
+        <SidebarContent className="px-2">
 
-              return (
-                <SidebarMenuItem
-                  key={link.href}
-                  className="border-b border-muted/40"
-                >
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive}
-                    tooltip={link.title}
-                    className="py-6 text-lg"
-                  >
-                    <Link
-                      href={link.href}
-                      className="flex items-center gap-5 px-5"
-                    >
-                      <Icon className="!h-6 !w-6" />
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        {link.title}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
-          </SidebarMenu>
+          {sections.map((section) => (
+
+            <div key={section.title} className="mb-6">
+
+              {/* Section Title */}
+              <p className="text-[10px] font-semibold text-muted-foreground px-4 mb-2 uppercase tracking-wide">
+                {section.title}
+              </p>
+
+              <SidebarMenu>
+
+                {section.items.map((link) => {
+                  const isActive = pathname === link.href
+                  const Icon = link.icon
+
+                  return (
+                    <SidebarMenuItem key={link.href}>
+
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={link.title}
+                        className="h-9 text-sm"
+                      >
+
+                        <Link
+                          href={link.href}
+                          className="flex items-center gap-4 px-4"
+                        >
+
+                          <Icon className="!h-5 !w-5" />
+
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {link.title}
+                          </span>
+
+                        </Link>
+
+                      </SidebarMenuButton>
+
+                    </SidebarMenuItem>
+                  )
+                })}
+
+              </SidebarMenu>
+
+            </div>
+
+          ))}
+
         </SidebarContent>
 
-        {/* Footer */}
+        {/* USER FOOTER */}
         <SidebarFooter className="border-t">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="Home"
-                className="py-6 text-lg"
-              >
-                <Link
-                  href="/"
-                  className="flex items-center gap-5 px-5"
-                >
-                  <Home className="!h-6 !w-6" />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    Home
-                  </span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+
+          <div className="flex items-center gap-3 px-4 py-4">
+
+            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
+              OS
+            </div>
+
+            <div className="group-data-[collapsible=icon]:hidden">
+              <p className="text-sm font-medium">Onfire Store</p>
+              <p className="text-xs text-muted-foreground">
+                Expéditeur
+              </p>
+            </div>
+
+          </div>
+
         </SidebarFooter>
 
       </Sidebar>
 
-      {/* Page Content */}
+      {/* PAGE CONTENT */}
       <SidebarInset>
         <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
       </SidebarInset>
+
     </SidebarProvider>
   )
 }
