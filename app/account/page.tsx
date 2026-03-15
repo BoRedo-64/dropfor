@@ -130,73 +130,6 @@ export default async function AccountPage() {
 
         {/* Main Dashboard Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* Payments */}
-          <div className="lg:col-span-2">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                  Paiements
-                </CardTitle>
-                <CardDescription>
-                  Tes Derniers Paiements
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                {recentOrders.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentOrders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {order.type}
-                          </p>
-
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(
-                              order.created_at
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <Badge
-                            variant={
-                              order.status === "Payée"
-                                ? "default"
-                                : order.status === "Non Payée"
-                                ? "secondary"
-                                : "outline"
-                            }
-                            className="mb-1"
-                          >
-                            {order.status}
-                          </Badge>
-
-                          <p className="text-sm font-medium">
-                            ${order.amount}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-10">
-                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      No orders yet
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Chart */}
           <div>
             <Card className="h-full">
@@ -215,30 +148,6 @@ export default async function AccountPage() {
               </CardContent>
             </Card>
           </div>
-
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid md:grid-cols-2 gap-4 mt-6">
-
-          <Button size="lg" className="w-full" asChild>
-            <Link
-              href="https://partner.converty.shop"
-              target="_blank"
-            >
-              Converty
-            </Link>
-          </Button>
-
-          <Button size="lg" variant="secondary" className="w-full" asChild>
-            <Link
-              href="https://fiabilo.tn/expediteur/dashboard.php"
-              target="_blank"
-            >
-              Intigo
-            </Link>
-          </Button>
-
         </div>
       </div>
     </div>

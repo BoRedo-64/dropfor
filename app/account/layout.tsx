@@ -13,14 +13,13 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard,
   ShoppingCart,
   CreditCard,
   Home,
+  Package,
 } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
 
 const sidebarLinks = [
   {
@@ -50,19 +49,21 @@ export default function AccountLayout({
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon" className="border-r">
-        {/* Sidebar Header */}
+
+        {/* Header */}
         <SidebarHeader className="border-b">
-          <div className="flex items-center gap-2 px-2">
-            <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">
-              D
+          <div className="flex items-center gap-4 px-5 py-4">
+            <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-lg">
+              <Package className="h-5 w-5" />
             </div>
-            <span className="font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
+
+            <span className="text-xl font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
               Dropfor
             </span>
           </div>
         </SidebarHeader>
 
-        {/* Sidebar Content */}
+        {/* Menu */}
         <SidebarContent>
           <SidebarMenu>
             {sidebarLinks.map((link) => {
@@ -70,15 +71,24 @@ export default function AccountLayout({
               const Icon = link.icon
 
               return (
-                <SidebarMenuItem key={link.href}>
+                <SidebarMenuItem
+                  key={link.href}
+                  className="border-b border-muted/40"
+                >
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}
                     tooltip={link.title}
+                    className="py-6 text-lg"
                   >
-                    <Link href={link.href} className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
-                      <span>{link.title}</span>
+                    <Link
+                      href={link.href}
+                      className="flex items-center gap-5 px-5"
+                    >
+                      <Icon className="!h-6 !w-6" />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {link.title}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -87,24 +97,34 @@ export default function AccountLayout({
           </SidebarMenu>
         </SidebarContent>
 
-        {/* Sidebar Footer */}
+        {/* Footer */}
         <SidebarFooter className="border-t">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Home">
-                <Link href="/" className="flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  <span>Home</span>
+              <SidebarMenuButton
+                asChild
+                tooltip="Home"
+                className="py-6 text-lg"
+              >
+                <Link
+                  href="/"
+                  className="flex items-center gap-5 px-5"
+                >
+                  <Home className="!h-6 !w-6" />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    Home
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
+
       </Sidebar>
 
-      {/* Main Content */}
+      {/* Page Content */}
       <SidebarInset>
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
       </SidebarInset>
