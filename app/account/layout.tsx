@@ -1,7 +1,10 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { createClient } from "@/lib/supabase/client"
+import { useEffect, useState } from "react"
 import Link from 'next/link'
+
 import {
   SidebarProvider,
   Sidebar,
@@ -79,6 +82,40 @@ export default function AccountLayout({
 }) {
   const pathname = usePathname()
 
+  const [userName, setUserName] = useState("User")
+  const [initials, setInitials] = useState("U")
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient()
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) return
+
+      const firstName = user.user_metadata?.first_name || ""
+      const lastName = user.user_metadata?.last_name || ""
+
+      const fullName = `${firstName} ${lastName}`.trim()
+
+      if (fullName) {
+        setUserName(fullName)
+
+        const initials = fullName
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+
+        setInitials(initials)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon" className="border-r">
@@ -98,14 +135,14 @@ export default function AccountLayout({
           </div>
         </SidebarHeader>
 
-        {/* CONTENT */}
+        {/* SIDEBAR CONTENT */}
         <SidebarContent className="px-2">
 
           {sections.map((section) => (
 
             <div key={section.title} className="mb-6">
 
-              {/* Section Title */}
+              {/* SECTION TITLE */}
               <p className="text-[10px] font-semibold text-muted-foreground px-4 mb-2 uppercase tracking-wide">
                 {section.title}
               </p>
@@ -159,11 +196,11 @@ export default function AccountLayout({
           <div className="flex items-center gap-3 px-4 py-4">
 
             <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
-              OS
+              {initials}
             </div>
 
             <div className="group-data-[collapsible=icon]:hidden">
-              <p className="text-sm font-medium">Onfire Store</p>
+              <p className="text-sm font-medium">{userName}</p>
               <p className="text-xs text-muted-foreground">
                 Expéditeur
               </p>
