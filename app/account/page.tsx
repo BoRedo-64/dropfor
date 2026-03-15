@@ -180,7 +180,21 @@ export default async function AccountPage() {
               </CardContent>
             </Card>
           </div>
-          <div className="flex flex-col gap-4">
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Order Success Rate</CardTitle>
+              <CardDescription>Delivered vs Returned Orders</CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <OrderRateChart
+                delivered={stats?.delivered ?? 0}
+                returns={stats?.returns ?? 0}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      <div className="flex flex-col gap-4">
             <Button size="lg" className="w-full" asChild>
               <Link href="https://partner.converty.shop" target="_blank">
                 Converty
@@ -192,21 +206,7 @@ export default async function AccountPage() {
                 Intigo
               </Link>
             </Button>
-          </div>
-        </div>
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Order Success Rate</CardTitle>
-            <CardDescription>Delivered vs Returned Orders</CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <OrderRateChart
-              delivered={stats?.delivered ?? 0}
-              returns={stats?.returns ?? 0}
-            />
-          </CardContent>
-        </Card>
+      </div>
       </div>
     </div>
   )
