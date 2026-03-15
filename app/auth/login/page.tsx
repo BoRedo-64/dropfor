@@ -24,19 +24,40 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-    if (error) {
-      setError(error.message)
-      setIsLoading(false)
-      return
-    }
+  if (error) {
+    setError(error.message)
+    setIsLoading(false)
+    return
+  }
 
+  const user = data.user
+
+  // check role in profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user?.id)
+    .single()
+
+  if (profileError) {
+    setError("Could not verify user role")
+    setIsLoading(false)
+    return
+  }
+
+  // redirect based on role
+  if (profile?.is_admin) {
+    router.push("/admin")
+  } else {
     router.push("/account")
-    router.refresh()
+  }
+
+  router.refresh()
   }
 
   return (
