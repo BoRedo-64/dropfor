@@ -15,7 +15,7 @@ export function OrderRateChart({ delivered, returns }: Props) {
     { name: "Returned", value: returns },
   ]
 
-  const COLORS = ["#22c55e", "#ef4444"]
+  const COLORS = ["#007fc5", "#ecf3f8"]
 
   const deliveredRate = total ? Math.round((delivered / total) * 100) : 0
   const returnRate = total ? Math.round((returns / total) * 100) : 0

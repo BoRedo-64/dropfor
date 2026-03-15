@@ -180,6 +180,7 @@ export default async function AccountPage() {
               </CardContent>
             </Card>
           </div>
+          <div>
           <Card className="mt-6">
             <CardHeader>
               <CardTitle>Order Success Rate</CardTitle>
@@ -193,6 +194,7 @@ export default async function AccountPage() {
               />
             </CardContent>
           </Card>
+          </div>
         </div>
       <div className="flex flex-col gap-4">
             <Button size="lg" className="w-full" asChild>
