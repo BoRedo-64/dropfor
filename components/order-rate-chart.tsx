@@ -40,10 +40,10 @@ export function OrderRateChart({ delivered, returns }: Props) {
       </ResponsiveContainer>
 
       <div className="flex justify-center gap-6 mt-2 text-sm">
-        <span className="text-green-600 font-medium">
+        <span className="text-blue-500">
           Delivered: {deliveredRate}%
         </span>
-        <span className="text-red-500 font-medium">
+        <span className="text-blue-100">
           Returns: {returnRate}%
         </span>
       </div>
