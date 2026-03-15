@@ -8,6 +8,7 @@ import { Package, ShoppingCart, Truck, TrendingUp, Clock, DollarSign, User, Sett
 import { AccountSettings } from "@/components/account-settings"
 import { getPayments } from "@/lib/payments"
 import { getUserStats } from "@/lib/stats"
+import { OrderRateChart } from "@/components/order-rate-chart"
 
 const quickActions = [
   { icon: Package, label: "Browse Products", href: "/services" },
@@ -192,13 +193,20 @@ export default async function AccountPage() {
               </Link>
             </Button>
           </div>
-          {/* Account Settings */}
-          {/*
-          <div>
-            <AccountSettings user={user} fullName={fullName} />
-          </div>
-          */}
         </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Order Success Rate</CardTitle>
+            <CardDescription>Delivered vs Returned Orders</CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <OrderRateChart
+              delivered={stats?.delivered ?? 0}
+              returns={stats?.returns ?? 0}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
