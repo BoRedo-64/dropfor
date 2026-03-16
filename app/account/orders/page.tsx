@@ -34,7 +34,7 @@ export default async function OrdersPage({
     redirect("/auth/login")
   }
 
-  // unwrap search params
+  // unwrap params
   const params = await searchParams
 
   let query = supabase
@@ -73,7 +73,7 @@ export default async function OrdersPage({
         </div>
 
         {/* Filters */}
-        <OrdersFilters />
+        <OrdersFilters filters={params} />
 
         <Card>
           <CardHeader>
@@ -113,15 +113,10 @@ export default async function OrdersPage({
                       <tr key={order.id} className="border-t">
 
                         <td className="p-3 font-medium">{order.name}</td>
-
                         <td className="p-3">{order.number}</td>
-
                         <td className="p-3">{order.city}</td>
-
                         <td className="p-3">{order.quantity}</td>
-
                         <td className="p-3">{order.nbr_colis}</td>
-
                         <td className="p-3 font-medium">${order.total}</td>
 
                         {/* STATUS */}
