@@ -71,21 +71,11 @@ export default async function AccountPage() {
     <div className="py-8 md:py-12">
       <div className="container mx-auto px-4">
 
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="h-8 w-8 text-primary" />
-          </div>
-
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">
-              Welcome back, {firstName}!
-            </h1>
-            <p className="text-muted-foreground">{user.email}</p>
-            <Badge variant="secondary" className="mt-2">
-              Free Plan
-            </Badge>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
+          <p className="text-muted-foreground">
+            Suivez vos commandes et performances
+          </p>
         </div>
 
         {/* Top Stats */}
