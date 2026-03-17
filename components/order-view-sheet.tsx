@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 
-type OrderSheetMode = "view" | "create"
+type OrderSheetMode = "view" | "create" | "edit"
 
 interface OrderData {
   id?: string
@@ -135,11 +135,18 @@ export function OrderViewSheet({
   }
 
   const handleSubmit = () => {
-    console.log("[v0] Form submitted with data:", formData)
+    if (mode === "edit") {
+      console.log("[v0] Order updated with data:", formData)
+    } else {
+      console.log("[v0] New order created with data:", formData)
+    }
     // TODO: Connect to backend API
   }
 
   const isViewMode = mode === "view"
+  const isEditMode = mode === "edit"
+  const isCreateMode = mode === "create"
+  const isFormMode = isEditMode || isCreateMode
 
   return (
     <Sheet>
@@ -157,11 +164,15 @@ export function OrderViewSheet({
                   <SheetTitle className="text-2xl font-bold">
                     {isViewMode
                       ? `Order #${order?.id?.slice(0, 6)}`
+                      : isEditMode
+                      ? "Modifier commande"
                       : "Nouvelle commande"}
                   </SheetTitle>
                   <SheetDescription>
                     {isViewMode
                       ? "View order details and information"
+                      : isEditMode
+                      ? "Mettre à jour les informations de commande"
                       : "Créer une nouvelle commande client"}
                   </SheetDescription>
                 </div>
@@ -194,7 +205,7 @@ export function OrderViewSheet({
                       <InfoField label="Address" value={order?.adress || "—"} />
                     </div>
                   </div>
-                ) : (
+                ) : isFormMode && (
                   <div className="grid grid-cols-2 gap-6 rounded-lg bg-muted/40 p-5">
                     <FormField label="Name">
                       <Input
@@ -262,7 +273,7 @@ export function OrderViewSheet({
                       }
                     />
                   </div>
-                ) : (
+                ) : isFormMode && (
                   <div className="grid grid-cols-3 gap-4 rounded-lg bg-muted/40 p-5">
                     <FormField label="Quantity">
                       <Input
@@ -319,7 +330,7 @@ export function OrderViewSheet({
                       {order?.content || "No products listed"}
                     </div>
                   </div>
-                ) : (
+                ) : isFormMode && (
                   <FormField label="Products List">
                     <Textarea
                       placeholder="Enter products list (one per line or comma-separated)"
@@ -335,8 +346,8 @@ export function OrderViewSheet({
             </div>
           </div>
 
-        {/* Sticky Footer - Only show for create mode */}
-        {!isViewMode && (
+        {/* Sticky Footer - Only show for create/edit modes */}
+        {isFormMode && (
           <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-8 py-4 mt-auto">
             <div className="flex gap-3 justify-end">
               <SheetClose asChild>
@@ -345,7 +356,7 @@ export function OrderViewSheet({
                 </Button>
               </SheetClose>
               <Button onClick={handleSubmit}>
-                Créer commande
+                {isEditMode ? "Enregistrer les modifications" : "Créer commande"}
               </Button>
             </div>
           </div>

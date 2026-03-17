@@ -182,19 +182,18 @@ export default async function OrdersPage({
                           <div className="flex items-center gap-3">
 
                             {/* View */}
-                            <OrderViewSheet order={order}>
+                            <OrderViewSheet mode="view" order={order}>
                               <button className="text-muted-foreground hover:text-primary">
                                 <Eye className="h-4 w-4" />
                               </button>
                             </OrderViewSheet>
 
                             {/* Edit */}
-                            <a
-                              href={`/account/orders/edit/${order.id}`}
-                              className="text-muted-foreground hover:text-blue-600"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </a>
+                            <OrderViewSheet mode="edit" order={order}>
+                              <button className="text-muted-foreground hover:text-blue-600">
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                            </OrderViewSheet>
 
                             {/* Delete */}
                             <DeleteOrderButton id={order.id} />
