@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { OrderViewSheet } from "@/components/order-view-sheet"
 
 import {
   Card,
@@ -13,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Package } from "lucide-react"
 
 import { OrdersFilters } from "@/components/orders-filters"
+import { DeleteOrderButton } from "@/components/delete-order-button"
 
 export default async function OrdersPage({
   searchParams,
@@ -76,11 +82,22 @@ export default async function OrdersPage({
         <OrdersFilters filters={params} />
 
         <Card>
-          <CardHeader>
-            <CardTitle>Orders List</CardTitle>
-            <CardDescription>
-              All orders from your customers
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+
+            <div>
+              <CardTitle>Orders List</CardTitle>
+              <CardDescription>
+                All orders from your customers
+              </CardDescription>
+            </div>
+
+            <Button asChild>
+              <Link href="/account/orders/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter
+              </Link>
+            </Button>
+
           </CardHeader>
 
           <CardContent>
@@ -103,6 +120,7 @@ export default async function OrdersPage({
                       <th className="text-left p-3 font-medium">Payment</th>
                       <th className="text-left p-3 font-medium">Livreur</th>
                       <th className="text-left p-3 font-medium">Date</th>
+                      <th className="text-left p-3 font-medium">Actions</th>
                     </tr>
                   </thead>
 
@@ -158,6 +176,30 @@ export default async function OrdersPage({
 
                         <td className="p-3">
                           {new Date(order.created_at).toLocaleDateString()}
+                        </td>
+
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+
+                            {/* View */}
+                            <OrderViewSheet order={order}>
+                              <button className="text-muted-foreground hover:text-primary">
+                                <Eye className="h-4 w-4" />
+                              </button>
+                            </OrderViewSheet>
+
+                            {/* Edit */}
+                            <a
+                              href={`/account/orders/edit/${order.id}`}
+                              className="text-muted-foreground hover:text-blue-600"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </a>
+
+                            {/* Delete */}
+                            <DeleteOrderButton id={order.id} />
+
+                          </div>
                         </td>
 
                       </tr>
