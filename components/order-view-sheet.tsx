@@ -4,6 +4,7 @@ import { useState } from "react"
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -158,11 +159,11 @@ export function OrderViewSheet({
                       ? `Order #${order?.id?.slice(0, 6)}`
                       : "Nouvelle commande"}
                   </SheetTitle>
-                  {!isViewMode && (
-                    <p className="text-sm text-muted-foreground">
-                      Créer une nouvelle commande client
-                    </p>
-                  )}
+                  <SheetDescription>
+                    {isViewMode
+                      ? "View order details and information"
+                      : "Créer une nouvelle commande client"}
+                  </SheetDescription>
                 </div>
               </div>
 
