@@ -8,6 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -146,10 +147,9 @@ export function OrderViewSheet({
 
       <SheetContent
         side="right"
-        className="w-[720px] max-w-[100vw] overflow-y-auto p-0 sm:w-[550px]"
+        className="w-[720px] max-w-[100vw] p-0 sm:w-[550px] flex flex-col"
       >
-        <div className="flex h-full flex-col">
-          {/* Sticky Header */}
+        {/* Sticky Header */}
           <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <SheetHeader className="space-y-4 px-8 py-6">
               <div className="flex items-start justify-between gap-4">
@@ -335,23 +335,21 @@ export function OrderViewSheet({
             </div>
           </div>
 
-          {/* Sticky Footer - Only show for create mode */}
-          {!isViewMode && (
-            <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-8 py-4">
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" size="default">
+        {/* Sticky Footer - Only show for create mode */}
+        {!isViewMode && (
+          <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-8 py-4 mt-auto">
+            <div className="flex gap-3 justify-end">
+              <SheetClose asChild>
+                <Button variant="outline">
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleSubmit}
-                  size="default"
-                >
-                  Créer commande
-                </Button>
-              </div>
+              </SheetClose>
+              <Button onClick={handleSubmit}>
+                Créer commande
+              </Button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   )
