@@ -91,12 +91,12 @@ export default async function OrdersPage({
               </CardDescription>
             </div>
 
-            <Button asChild>
-              <Link href="/account/orders/new">
+            <OrderViewSheet mode="create" order={{}}>
+              <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Ajouter
-              </Link>
-            </Button>
+                Ajouter commande
+              </Button>
+            </OrderViewSheet>
 
           </CardHeader>
 
