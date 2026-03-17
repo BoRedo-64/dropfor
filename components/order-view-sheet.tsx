@@ -134,14 +134,31 @@ export function OrderViewSheet({
     }))
   }
 
-  const handleSubmit = () => {
-    if (mode === "edit") {
-      console.log("[v0] Order updated with data:", formData)
-    } else {
-      console.log("[v0] New order created with data:", formData)
+  const handleSubmit = async () => {
+  try {
+    const endpoint =
+      mode === "edit" ? "/api/orders/update" : "/api/orders/create"
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed")
     }
-    // TODO: Connect to backend API
+
+    // ✅ refresh data
+    window.location.reload()
+
+  } catch (err) {
+    console.error(err)
+    alert("Something went wrong")
   }
+}
 
   const isViewMode = mode === "view"
   const isEditMode = mode === "edit"
@@ -356,7 +373,7 @@ export function OrderViewSheet({
                 </Button>
               </SheetClose>
               <Button onClick={handleSubmit}>
-                {isEditMode ? "Enregistrer les modifications" : "Créer commande"}
+                {isEditMode ? "Enregistrer" : "Créer commande"}
               </Button>
             </div>
           </div>

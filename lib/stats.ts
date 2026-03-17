@@ -7,20 +7,53 @@ export async function getUserStats() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
-  const { data, error } = await supabase
-    .from("stats")
+  // ✅ today range
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
+
+  // ✅ fetch today's orders
+  const { data: orders, error } = await supabase
+    .from("orders")
     .select("*")
     .eq("user_id", user.id)
-    .single()
+    .gte("created_at", todayStart.toISOString())
+    .lte("created_at", todayEnd.toISOString())
 
   if (error) {
-    console.error("Error fetching stats:", error)
+    console.error(error)
     return null
   }
 
-  return data
+  const safeOrders = orders || []
+
+  // ✅ counts
+  const total = safeOrders.length
+
+  const deliveredOrders = safeOrders.filter(
+    (o) => o.status === "delivered"
+  )
+  const delivered = deliveredOrders.length
+
+  const returns = safeOrders.filter(
+    (o) => o.status === "returned"
+  ).length
+
+  // ✅ revenue ONLY from delivered
+  const revenue =
+    deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0) -
+    7 * delivered
+
+  return {
+    products: 0,
+    revenue,
+    balance: 0,
+    total,
+    delivered,
+    returns,
+  }
 }

@@ -1,35 +1,39 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
+import { OrdersBarChart } from "@/components/orders-chart"
+import { getOrdersChartData } from "@/lib/chart-calc"
+
 import {
   Package,
   ShoppingCart,
   DollarSign,
-  User,
   CheckCircle,
   RotateCcw,
 } from "lucide-react"
-import { getPayments } from "@/lib/payments"
+
 import { getUserStats } from "@/lib/stats"
-import { OrderRateChart } from "@/components/order-rate-chart"
 
 export default async function AccountPage() {
   const supabase = await createClient()
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const recentOrders = (await getPayments()) || []
-  const stats = await getUserStats()
 
   if (!user) {
     redirect("/auth/login")
   }
 
-  const firstName = user.user_metadata?.first_name || "User"
+  const stats = await getUserStats()
+  const chartData = await getOrdersChartData() // ✅ ADDED
 
   const topStats = [
     {
@@ -71,6 +75,7 @@ export default async function AccountPage() {
     <div className="py-8 md:py-12">
       <div className="container mx-auto px-4">
 
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
           <p className="text-muted-foreground">
@@ -118,27 +123,22 @@ export default async function AccountPage() {
           ))}
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Chart */}
-          <div>
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Order Success Rate</CardTitle>
-                <CardDescription>
-                  Delivered vs Returned Orders
-                </CardDescription>
-              </CardHeader>
+        {/* ✅ NEW CHART SECTION */}
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commandes (7 derniers jours)</CardTitle>
+              <CardDescription>
+                Total des commandes et retours
+              </CardDescription>
+            </CardHeader>
 
-              <CardContent>
-                <OrderRateChart
-                  delivered={stats?.delivered ?? 0}
-                  returns={stats?.returns ?? 0}
-                />
-              </CardContent>
-            </Card>
-          </div>
+            <CardContent>
+              <OrdersBarChart data={chartData} />
+            </CardContent>
+          </Card>
         </div>
+
       </div>
     </div>
   )
