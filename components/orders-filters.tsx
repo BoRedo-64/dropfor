@@ -25,17 +25,20 @@ export function OrdersFilters() {
   const [city, setCity] = useState(params.get("city") || "")
 
   function updateParams(next: Record<string, string>) {
-    const newParams = new URLSearchParams(params)
+    const newParams = new URLSearchParams(params.toString())
 
     Object.entries(next).forEach(([key, value]) => {
       if (!value) newParams.delete(key)
       else newParams.set(key, value)
     })
 
+    // ✅ ALWAYS reset pagination when filtering
+    newParams.set("page", "1")
+
     router.push(`/account/orders?${newParams.toString()}`)
   }
 
-  // debounce search so it doesn't lag
+  // ✅ debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       updateParams({ search })
@@ -61,7 +64,7 @@ export function OrdersFilters() {
 
       {/* Status */}
       <Select
-        value={status}
+        value={status || undefined}
         onValueChange={(v) => {
           setStatus(v)
           updateParams({ status: v })
@@ -80,7 +83,7 @@ export function OrdersFilters() {
 
       {/* Payment */}
       <Select
-        value={payment}
+        value={payment || undefined}
         onValueChange={(v) => {
           setPayment(v)
           updateParams({ payment: v })
@@ -97,7 +100,7 @@ export function OrdersFilters() {
 
       {/* City */}
       <Select
-        value={city}
+        value={city || undefined}
         onValueChange={(v) => {
           setCity(v)
           updateParams({ city: v })
@@ -121,7 +124,8 @@ export function OrdersFilters() {
           setStatus("")
           setPayment("")
           setCity("")
-          router.push("/account/orders")
+
+          router.push("/account/orders?page=1")
         }}
       >
         Clear filters

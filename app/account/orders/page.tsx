@@ -29,6 +29,8 @@ export default async function OrdersPage({
     city?: string
     sort?: string
     order?: string
+    page?: string
+    limit?: string
   }>
 }) {
   const supabase = await createClient()
@@ -43,34 +45,44 @@ export default async function OrdersPage({
 
   const params = await searchParams
 
+  // ✅ pagination
+  const page = Number(params.page || "1")
+  const limit = Number(params.limit || "20")
+
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  // ✅ sorting
   const sort = params.sort || "created_at"
   const ascending = params.order === "asc"
 
-  let query = supabase.from("orders").select("*")
+  // ✅ base query (WITH RLS OPTIMIZATION)
+  let query = supabase
+    .from("orders")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
 
-  // filters
+  // ✅ filters
   if (params.search) {
-    query = query.or(`name.ilike.%${params.search}%,number.ilike.%${params.search}%`)
+    query = query.or(
+      `name.ilike.%${params.search}%,number.ilike.%${params.search}%`
+    )
   }
 
-  if (params.status) {
-    query = query.eq("status", params.status)
-  }
+  if (params.status) query = query.eq("status", params.status)
+  if (params.payment) query = query.eq("payment", params.payment)
+  if (params.city) query = query.eq("city", params.city)
 
-  if (params.payment) {
-    query = query.eq("payment", params.payment)
-  }
-
-  if (params.city) {
-    query = query.eq("city", params.city)
-  }
-
-  // sorting
+  // ✅ sorting + pagination
   query = query.order(sort, { ascending })
+  query = query.range(from, to)
 
-  const { data: orders } = await query
+  const { data: orders, count } = await query
 
-  // ✅ build URL (preserves filters)
+  const totalPages = Math.ceil((count || 0) / limit) || 1
+  const safePage = Math.min(page, totalPages)
+
+  // ✅ build URL (sorting)
   const buildUrl = (field: string) => {
     const newParams = new URLSearchParams(params as any)
 
@@ -85,7 +97,14 @@ export default async function OrdersPage({
     return `?${newParams.toString()}`
   }
 
-  // ✅ arrow icons
+  // ✅ build URL (pagination)
+  const buildPageUrl = (newPage: number) => {
+    const newParams = new URLSearchParams(params as any)
+    newParams.set("page", String(newPage))
+    return `?${newParams.toString()}`
+  }
+
+  // ✅ sort icons
   const sortIcon = (field: string) => {
     if (params.sort !== field) return null
     return params.order === "asc" ? (
@@ -135,7 +154,6 @@ export default async function OrdersPage({
 
                   <thead className="bg-muted/50">
                     <tr>
-
                       <th className="p-3 text-left">
                         <Link href={buildUrl("name")} className="flex items-center gap-1 hover:text-primary">
                           Client {sortIcon("name")}
@@ -238,7 +256,7 @@ export default async function OrdersPage({
                               </button>
                             </OrderViewSheet>
 
-                            <DeleteOrderButton id={order.id} />
+                            <DeleteOrderButton id={order.id} page={safePage} />
 
                           </div>
                         </td>
@@ -258,6 +276,24 @@ export default async function OrdersPage({
                 </p>
               </div>
             )}
+
+            {/* ✅ Pagination */}
+            <div className="flex items-center justify-between mt-4">
+
+              <Link href={buildPageUrl(Math.max(1, safePage - 1))}>
+                <Button disabled={safePage <= 1}>Previous</Button>
+              </Link>
+
+              <span className="text-sm">
+                Page {safePage} of {totalPages}
+              </span>
+
+              <Link href={buildPageUrl(Math.min(totalPages, safePage + 1))}>
+                <Button disabled={safePage >= totalPages}>Next</Button>
+              </Link>
+
+            </div>
+
           </CardContent>
 
         </Card>

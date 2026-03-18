@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/card"
 
 import { OrdersBarChart } from "@/components/orders-chart"
+import { OrdersStatusChart } from "@/components/orders-status-chart"
 import { getOrdersChartData } from "@/lib/chart-calc"
+import { getOrdersStatusData } from "@/lib/status-calc"
 
 import {
   Package,
@@ -33,7 +35,8 @@ export default async function AccountPage() {
   }
 
   const stats = await getUserStats()
-  const chartData = await getOrdersChartData() // ✅ ADDED
+  const chartData = await getOrdersChartData()
+  const statusData = await getOrdersStatusData() // ✅ NEW
 
   const topStats = [
     {
@@ -123,8 +126,10 @@ export default async function AccountPage() {
           ))}
         </div>
 
-        {/* ✅ NEW CHART SECTION */}
-        <div className="grid gap-6">
+        {/* 📊 CHARTS */}
+        <div className="grid md:grid-cols-2 gap-6">
+
+          {/* Orders Chart */}
           <Card>
             <CardHeader>
               <CardTitle>Commandes (7 derniers jours)</CardTitle>
@@ -137,6 +142,21 @@ export default async function AccountPage() {
               <OrdersBarChart data={chartData} />
             </CardContent>
           </Card>
+
+          {/* ✅ NEW STATUS CHART (NO NESTED CARD) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Aperçu des Statuts</CardTitle>
+              <CardDescription>
+                Distribution des commandes par statut
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <OrdersStatusChart data={statusData} />
+            </CardContent>
+          </Card>
+
         </div>
 
       </div>

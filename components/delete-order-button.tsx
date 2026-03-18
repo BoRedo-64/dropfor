@@ -1,14 +1,20 @@
 "use client"
 
 import { Trash2 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
-export function DeleteOrderButton({ id }: { id: string }) {
+export function DeleteOrderButton({
+  id,
+  page,
+}: {
+  id: string
+  page: number
+}) {
   const router = useRouter()
+  const params = useSearchParams()
 
   async function handleDelete() {
     const confirmDelete = confirm("Delete this order?")
-
     if (!confirmDelete) return
 
     await fetch("/api/orders/delete", {
@@ -16,7 +22,17 @@ export function DeleteOrderButton({ id }: { id: string }) {
       body: JSON.stringify({ id }),
     })
 
-    router.refresh()
+    // ✅ check if current page might become empty
+    const currentParams = new URLSearchParams(params.toString())
+    const currentPage = Number(currentParams.get("page") || "1")
+
+    // if we're not on first page → go back one page
+    if (currentPage > 1) {
+      currentParams.set("page", String(currentPage - 1))
+      router.push(`/account/orders?${currentParams.toString()}`)
+    } else {
+      router.refresh()
+    }
   }
 
   return (
