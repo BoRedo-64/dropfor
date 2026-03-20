@@ -208,32 +208,36 @@ export default async function OrdersPage({
                         <td className="p-3 font-medium">${order.total}</td>
 
                         <td className="p-3">
-                          <Badge className={
-                            order.status === "delivered"
-                              ? "bg-green-100 text-green-700"
-                              : order.status === "returned"
-                              ? "bg-red-100 text-red-700"
-                              : order.status === "shipped"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }>
-                            {order.status || "pending"}
+                          <Badge
+                            className={
+                              order.status === "livré"
+                                ? "bg-green-100 text-green-700"
+                                : order.status === "retour"
+                                ? "bg-red-100 text-red-700"
+                                : order.status === "en cours"
+                                ? "bg-blue-100 text-blue-700"
+                                : order.status === "au depot"
+                                ? "bg-gray-100 text-gray-700"
+                                : "bg-yellow-100 text-yellow-700" // en attente (default)
+                            }
+                          >
+                            {order.status}
                           </Badge>
                         </td>
 
                         <td className="p-3">
                           <Badge className={
-                            order.payment === "paid"
+                            order.payment === "payé"
                               ? "bg-green-100 text-green-700"
                               : "bg-red-100 text-red-700"
                           }>
-                            {order.payment || "unpaid"}
+                            {order.payment || "non payé"}
                           </Badge>
                         </td>
 
                         <td className="p-3">
                           <Badge variant="secondary">
-                            {order.livreur || "—"}
+                            {order.livreur_id ? "Assigned" : "Unassigned"}
                           </Badge>
                         </td>
 

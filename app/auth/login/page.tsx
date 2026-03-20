@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle
+} from "@/components/ui/card"
 import { Package, Loader2, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -16,6 +18,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -25,39 +28,41 @@ export default function LoginPage() {
     setError(null)
 
     const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+      email,
+      password,
+    })
 
-  if (error) {
-    setError(error.message)
-    setIsLoading(false)
-    return
-  }
+    if (error) {
+      setError(error.message)
+      setIsLoading(false)
+      return
+    }
 
-  const user = data.user
+    const user = data.user
 
-  // check role in profiles table
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user?.id)
-    .single()
+    // ✅ FIX: use role instead of is_admin
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user?.id)
+      .single()
 
-  if (profileError) {
-    setError("Could not verify user role")
-    setIsLoading(false)
-    return
-  }
+    if (profileError) {
+      setError("Could not verify user role")
+      setIsLoading(false)
+      return
+    }
 
-  // redirect based on role
-  if (profile?.is_admin) {
-    router.push("/admin")
-  } else {
-    router.push("/account")
-  }
+    // ✅ ROLE-BASED REDIRECT
+    if (profile?.role === "admin") {
+      router.push("/admin")
+    } else if (profile?.role === "livreur") {
+      router.push("/livreur")
+    } else {
+      router.push("/account") // default user
+    }
 
-  router.refresh()
+    router.refresh()
   }
 
   return (
@@ -66,25 +71,28 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-4">
             <Package className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Dropfor</span>
+            <span className="text-2xl font-bold">Dropfor</span>
           </Link>
+
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
             Sign in to your account to continue
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label>Email</Label>
               <Input
-                id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -92,18 +100,10 @@ export default function LoginPage() {
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="#"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label>Password</Label>
               <Input
-                id="password"
                 type="password"
                 placeholder="Enter your password"
                 value={password}
@@ -111,6 +111,7 @@ export default function LoginPage() {
                 required
               />
             </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -121,13 +122,16 @@ export default function LoginPage() {
                 "Sign In"
               )}
             </Button>
+
           </form>
+
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {"Don't have an account? "}
             <Link href="/auth/sign-up" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
           </div>
+
         </CardContent>
       </Card>
     </div>
