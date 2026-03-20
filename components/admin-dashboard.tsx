@@ -87,7 +87,9 @@ export function AdminDashboard() {
         <div class="label">
 
           <div class="header">
-            <div class="sender">EXPÉDITEUR: DROPFOR</div>
+            <div class="sender">EXPÉDITEUR: ${order.profiles
+                      ? `${order.profiles.first_name ?? ""} ${order.profiles.last_name ?? ""}`
+                      : "—"}</div>
             <div class="order">Commande #: ${order.order_number}</div>
           </div>
 
