@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { LivreurDashboard } from "@/components/livreur-dashboard"
 
 export default async function LivreurPage() {
   const supabase = await createClient()
@@ -25,12 +26,5 @@ export default async function LivreurPage() {
     redirect("/account") // or "/" or "/admin"
   }
 
-  return (
-    <div className="min-h-screen bg-background p-8">
-      <h1 className="text-3xl font-bold mb-4">Livreur Dashboard</h1>
-      <p className="text-muted-foreground">
-        Welcome, you can see your assigned orders here.
-      </p>
-    </div>
-  )
+  return <LivreurDashboard />
 }
