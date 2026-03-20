@@ -11,10 +11,12 @@ export function LayoutClient({
 }) {
   const pathname = usePathname()
   const isAccountPage = pathname.startsWith("/account")
+  const isDeliveryPage = pathname.startsWith("/livreur")
+  const isAdminPage = pathname.startsWith("/admin")
 
   return (
     <>
-      {!isAccountPage && <Navbar />}
+      {!isAccountPage && !isAdminPage && !isDeliveryPage && <Navbar />}
 
       <main className="flex-1">{children}</main>
 
