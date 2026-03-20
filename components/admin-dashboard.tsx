@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -25,8 +24,6 @@ type Order = {
 }
 
 export function AdminDashboard() {
-  const router = useRouter()
-
   const [orders, setOrders] = useState<Order[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(false)
@@ -38,11 +35,10 @@ export function AdminDashboard() {
       const res = await fetch(`/api/admin/orders?search=${search}`)
       const data = await res.json()
 
-      // ✅ FIX: ensure it's always an array
       setOrders(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error(err)
-      setOrders([]) // fallback
+      setOrders([])
     } finally {
       setLoading(false)
     }
@@ -84,7 +80,7 @@ export function AdminDashboard() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 
         <Input
-          placeholder="Search by name..."
+          placeholder="Search by user name..."
           className="pl-9"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

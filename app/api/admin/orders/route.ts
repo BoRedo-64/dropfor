@@ -12,14 +12,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // ✅ check admin
+  // ✅ FIX: use role instead of is_admin
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("role")
     .eq("id", user.id)
     .single()
 
-  if (!profile?.is_admin) {
+  if (profile?.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -27,12 +27,10 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get("search")
 
   // ✅ STEP 1: get orders
-  let query = supabase
+  const { data: orders, error } = await supabase
     .from("orders")
     .select("*")
     .order("created_at", { ascending: false })
-
-  const { data: orders, error } = await query
 
   if (error) {
     console.error(error)
@@ -51,32 +49,29 @@ export async function GET(req: NextRequest) {
     .select("id, first_name, last_name")
     .in("id", userIds)
 
-
-    // ✅ STEP 3: merge + search by user name
-    const merged = orders.map((order) => {
+  // ✅ STEP 3: merge
+  const merged = orders.map((order) => {
     const profile = profiles?.find((p) => p.id === order.user_id)
 
     return {
-        ...order,
-        profiles: profile || null,
+      ...order,
+      profiles: profile || null,
     }
-    })
+  })
 
-    // ✅ NEW: filter by user name
-    let filtered = merged
+  // ✅ STEP 4: search by user name
+  let filtered = merged
 
-    if (search) {
+  if (search) {
     const s = search.toLowerCase()
 
     filtered = merged.filter((order) => {
-        const fullName =
+      const fullName =
         `${order.profiles?.first_name ?? ""} ${order.profiles?.last_name ?? ""}`.toLowerCase()
 
-        return fullName.includes(s)
+      return fullName.includes(s)
     })
-    }
+  }
 
-    return NextResponse.json(filtered)
-
-  return NextResponse.json(merged)
+  return NextResponse.json(filtered)
 }

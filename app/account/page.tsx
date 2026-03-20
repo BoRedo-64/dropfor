@@ -26,6 +26,7 @@ import { getUserStats } from "@/lib/stats"
 export default async function AccountPage() {
   const supabase = await createClient()
 
+  // 🔐 get user
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -34,9 +35,25 @@ export default async function AccountPage() {
     redirect("/auth/login")
   }
 
+  // 🔐 get role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  // 🚫 block non-user roles
+  if (profile?.role !== "user") {
+    if (profile?.role === "admin") redirect("/admin")
+    if (profile?.role === "livreur") redirect("/livreur")
+
+    redirect("/") // fallback
+  }
+
+  // ✅ rest of your logic
   const stats = await getUserStats()
   const chartData = await getOrdersChartData()
-  const statusData = await getOrdersStatusData() // ✅ NEW
+  const statusData = await getOrdersStatusData()
 
   const topStats = [
     {
@@ -126,10 +143,9 @@ export default async function AccountPage() {
           ))}
         </div>
 
-        {/* 📊 CHARTS */}
+        {/* Charts */}
         <div className="grid md:grid-cols-2 gap-6">
 
-          {/* Orders Chart */}
           <Card>
             <CardHeader>
               <CardTitle>Commandes (7 derniers jours)</CardTitle>
@@ -137,13 +153,11 @@ export default async function AccountPage() {
                 Total des commandes et retours
               </CardDescription>
             </CardHeader>
-
             <CardContent>
               <OrdersBarChart data={chartData} />
             </CardContent>
           </Card>
 
-          {/* ✅ NEW STATUS CHART (NO NESTED CARD) */}
           <Card>
             <CardHeader>
               <CardTitle>Aperçu des Statuts</CardTitle>
@@ -151,7 +165,6 @@ export default async function AccountPage() {
                 Distribution des commandes par statut
               </CardDescription>
             </CardHeader>
-
             <CardContent>
               <OrdersStatusChart data={statusData} />
             </CardContent>
