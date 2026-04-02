@@ -14,11 +14,12 @@ export async function POST(req: NextRequest) {
   }
 
   const parsedNumber = Number(order_number)
-
+  console.log("RAW:", order_number)
+  console.log("PARSED:", Number(order_number))
   const { data, error } = await supabase
     .from("orders")
     .update({ status: "au depot" })
-    .eq("order_number", parsedNumber) // ✅ number
+    .eq("order_number", parsedNumber)
     .eq("status", "pickup demandé")
     .select()
 

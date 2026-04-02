@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     .from("orders")
     .update({
       pickup_id: pickup.id,
-      status: "pickup_requested", // 🔥 optional but recommended
+      status: "pickup demandé",
     })
     .in("id", orderIds)
     .eq("user_id", user.id) // 🔒 security
