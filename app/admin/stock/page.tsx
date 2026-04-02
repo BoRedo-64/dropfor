@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { QrReader } from "react-qr-reader"
+import { Scanner } from "@yudiel/react-qr-scanner"
 
 export default function StockPage() {
   const [orderNumber, setOrderNumber] = useState("")
@@ -23,7 +23,7 @@ export default function StockPage() {
 
       <h1 className="text-2xl font-bold">Ajouter Stock</h1>
 
-      {/* 🔢 MANUAL INPUT */}
+      {/* INPUT */}
       <div className="space-y-2">
         <input
           placeholder="Numéro de commande"
@@ -40,7 +40,7 @@ export default function StockPage() {
         </button>
       </div>
 
-      {/* 📷 SCAN BUTTON */}
+      {/* BUTTON */}
       <button
         onClick={() => setScanning(true)}
         className="bg-blue-600 text-white px-4 py-2 rounded-md"
@@ -48,30 +48,31 @@ export default function StockPage() {
         Scanner QR Code
       </button>
 
-      {/* 📷 CAMERA */}
+      {/* CAMERA */}
       {scanning && (
         <div className="mt-4 border rounded-md overflow-hidden">
 
-            <QrReader
-            constraints={{ facingMode: "environment" }}
-            containerStyle={{ width: "100%", height: "300px" }}
-            videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
-            videoProps={{
-                autoPlay: true,
-                muted: true,
-                playsInline: true,
-            }}
-            onResult={(result, error) => {
-                if (result) {
-                const text = result.getText()
+          <Scanner
+            onScan={(result) => {
+              if (result?.[0]?.rawValue) {
+                const text = result[0].rawValue
                 const number = text.replace("ORDER-", "")
 
                 updateOrder(number)
                 setScanning(false)
-                }
+              }
             }}
-            />
-
+            onError={(err) => console.log(err)}
+            constraints={{ facingMode: "environment" }}
+            styles={{
+              container: { width: "100%" },
+              video: {
+                width: "100%",
+                height: "300px",
+                objectFit: "cover",
+              },
+            }}
+          />
 
           <button
             onClick={() => setScanning(false)}
