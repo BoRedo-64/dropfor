@@ -7,27 +7,23 @@ import {
   ResponsiveContainer,
 } from "recharts"
 
+import { getStatusConfig } from "@/lib/status" // 🔥 NEW
+
 type StatusData = {
-  name: string
+  name: string // 🔥 this should be RAW status (ex: "livré")
   value: number
 }
-
-const COLORS = [
-  "#22c55e", // Livré
-  "#ef4444", // Retour
-  "#3b82f6", // En livraison
-  "#eab308", // En attente
-]
 
 export function OrdersStatusChart({ data }: { data: StatusData[] }) {
   const total = data.reduce((acc, item) => acc + item.value, 0)
 
-  const delivered = data.find((d) => d.name === "Livré")?.value || 0
+  // 🔥 FIX: use raw status instead of label
+  const delivered = data.find((d) => d.name === "livré")?.value || 0
+
   const deliveryRate = total
     ? ((delivered / total) * 100).toFixed(1)
     : "0"
 
-  // ✅ FIX: only render non-zero values in chart
   const chartData = data.filter((item) => item.value > 0)
 
   return (
@@ -43,16 +39,17 @@ export function OrdersStatusChart({ data }: { data: StatusData[] }) {
               cy="50%"
               innerRadius={70}
               outerRadius={100}
-              paddingAngle={chartData.length > 1 ? 2 : 0} // ✅ fix gap issue
+              paddingAngle={chartData.length > 1 ? 2 : 0}
               dataKey="value"
               stroke="none"
             >
               {chartData.map((entry) => {
-                const index = data.findIndex(d => d.name === entry.name)
+                const config = getStatusConfig(entry.name)
+
                 return (
                   <Cell
                     key={entry.name}
-                    fill={COLORS[index]}
+                    fill={getColorFromClass(config.className)} // 🔥 convert tailwind → hex
                   />
                 )
               })}
@@ -64,7 +61,9 @@ export function OrdersStatusChart({ data }: { data: StatusData[] }) {
       {/* Legend + KPI */}
       <div className="w-[50%] flex flex-col justify-center gap-3">
 
-        {data.map((item, index) => {
+        {data.map((item) => {
+          const config = getStatusConfig(item.name)
+
           const percentage = total
             ? ((item.value / total) * 100).toFixed(1)
             : 0
@@ -77,10 +76,12 @@ export function OrdersStatusChart({ data }: { data: StatusData[] }) {
               <div className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full opacity-80"
-                  style={{ backgroundColor: COLORS[index] }}
+                  style={{
+                    backgroundColor: getColorFromClass(config.className),
+                  }}
                 />
                 <span className="text-muted-foreground">
-                  {item.name}
+                  {config.label}
                 </span>
               </div>
 
@@ -119,4 +120,18 @@ export function OrdersStatusChart({ data }: { data: StatusData[] }) {
 
     </div>
   )
+}
+
+/**
+ * 🔥 Helper: convert tailwind bg-* → real color
+ * (simple mapping for now)
+ */
+function getColorFromClass(className: string) {
+  if (className.includes("green")) return "#22c55e"
+  if (className.includes("red")) return "#ef4444"
+  if (className.includes("blue")) return "#3b82f6"
+  if (className.includes("yellow")) return "#eab308"
+  if (className.includes("purple")) return "#a855f7"
+  if (className.includes("orange")) return "#f97316"
+  return "#6b7280" // gray fallback
 }

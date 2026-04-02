@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 
 import { OrdersBarChart } from "@/components/orders-chart"
@@ -14,82 +12,110 @@ import { getOrdersChartData } from "@/lib/chart-calc"
 import { getOrdersStatusData } from "@/lib/status-calc"
 
 import {
-  Package,
-  ShoppingCart,
-  DollarSign,
+  Calendar,
+  Clock,
+  Truck,
   CheckCircle,
   RotateCcw,
+  AlertTriangle,
 } from "lucide-react"
-
-import { getUserStats } from "@/lib/stats"
 
 export default async function AccountPage() {
   const supabase = await createClient()
 
-  // 🔐 get user
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect("/auth/login")
-  }
+  if (!user) redirect("/auth/login")
 
-  // 🔐 get role
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single()
 
-  // 🚫 block non-user roles
   if (profile?.role !== "user") {
     if (profile?.role === "admin") redirect("/admin")
     if (profile?.role === "livreur") redirect("/livreur")
-
-    redirect("/") // fallback
+    redirect("/")
   }
 
-  // ✅ rest of your logic
-  const stats = await getUserStats()
-  const chartData = await getOrdersChartData()
-  const statusData = await getOrdersStatusData()
+  // 🔥 FETCH ORDERS
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("status, created_at")
+    .eq("user_id", user.id)
 
-  const topStats = [
-    {
-      icon: Package,
-      label: "Produits",
-      value: stats?.products ?? 0,
-    },
-    {
-      icon: DollarSign,
-      label: "Revenu",
-      value: `$${stats?.revenue ?? 0}`,
-    },
-    {
-      icon: DollarSign,
-      label: "Solde",
-      value: `$${stats?.balance ?? 0}`,
-    },
-  ]
+  const today = new Date().toISOString().slice(0, 10)
 
-  const orderStats = [
+  const stats = {
+    today: 0,
+    "en attente": 0,
+    "en cours": 0,
+    "livré": 0,
+    "retour": 0,
+    "a verifier": 0,
+  }
+
+  orders?.forEach((order) => {
+    const orderDate = order.created_at?.slice(0, 10)
+
+    if (orderDate === today) stats.today++
+
+    if (stats[order.status as keyof typeof stats] !== undefined) {
+      stats[order.status as keyof typeof stats]++
+    }
+  })
+
+  // 🎨 CARD CONFIG WITH COLORS
+  const cards = [
     {
-      icon: ShoppingCart,
-      label: "Total",
-      value: stats?.total ?? 0,
+      icon: Calendar,
+      label: "Aujourd'hui",
+      value: stats.today,
+      className: "bg-gray-50 text-gray-600",
+      iconColor: "text-gray-600",
+    },
+    {
+      icon: Clock,
+      label: "En attente",
+      value: stats["en attente"],
+      className: "bg-yellow-50 text-yellow-600",
+      iconColor: "text-yellow-600",
+    },
+    {
+      icon: Truck,
+      label: "En cours",
+      value: stats["en cours"],
+      className: "bg-blue-50 text-blue-600",
+      iconColor: "text-blue-600",
     },
     {
       icon: CheckCircle,
-      label: "Livrés",
-      value: stats?.delivered ?? 0,
+      label: "Livré",
+      value: stats["livré"],
+      className: "bg-green-50 text-green-600",
+      iconColor: "text-green-600",
     },
     {
       icon: RotateCcw,
-      label: "Retours",
-      value: stats?.returns ?? 0,
+      label: "Retour",
+      value: stats["retour"],
+      className: "bg-red-50 text-red-600",
+      iconColor: "text-red-600",
+    },
+    {
+      icon: AlertTriangle,
+      label: "À vérifier",
+      value: stats["a verifier"],
+      className: "bg-purple-50 text-purple-600",
+      iconColor: "text-purple-600",
     },
   ]
+
+  const chartData = await getOrdersChartData()
+  const statusData = await getOrdersStatusData()
 
   return (
     <div className="py-8 md:py-12">
@@ -103,41 +129,21 @@ export default async function AccountPage() {
           </p>
         </div>
 
-        {/* Top Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          {topStats.map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                </div>
-
-                <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Orders Stats */}
+        {/* 🎨 COLORED CARDS */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          {orderStats.map((stat) => (
-            <Card key={stat.label}>
+          {cards.map((card) => (
+            <Card key={card.label} className={card.className}>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                </div>
+
+                <card.icon className={`h-6 w-6 ${card.iconColor}`} />
 
                 <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.label}
+                  <p className="text-2xl font-bold">{card.value}</p>
+                  <p className="text-xs opacity-70">
+                    {card.label}
                   </p>
                 </div>
+
               </CardContent>
             </Card>
           ))}
@@ -147,25 +153,13 @@ export default async function AccountPage() {
         <div className="grid md:grid-cols-2 gap-6">
 
           <Card>
-            <CardHeader>
-              <CardTitle>Commandes (7 derniers jours)</CardTitle>
-              <CardDescription>
-                Total des commandes et retours
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <OrdersBarChart data={chartData} />
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Aperçu des Statuts</CardTitle>
-              <CardDescription>
-                Distribution des commandes par statut
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <OrdersStatusChart data={statusData} />
             </CardContent>
           </Card>

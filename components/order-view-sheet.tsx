@@ -30,6 +30,7 @@ interface OrderData {
   content?: string
   status?: string
   payment?: string
+  comment?: string
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -285,7 +286,7 @@ export function OrderViewSheet({
                       label="Total"
                       value={
                         <span className="text-base font-semibold text-primary">
-                          ${order?.total || "0"}
+                          {order?.total || "0"} DT
                         </span>
                       }
                     />
@@ -359,6 +360,14 @@ export function OrderViewSheet({
                     />
                   </FormField>
                 )}
+                {/* Comment Section */}
+                {isViewMode && ( 
+                  <section className="space-y-4 pb-20">
+                    <SectionLabel>Commentaire</SectionLabel>
+                    <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-900">
+                      {order?.comment || "Aucun commentaire"}
+                    </div> 
+                  </section> )}
               </section>
             </div>
           </div>

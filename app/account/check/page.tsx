@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Eye, Pencil, ArrowUp, ArrowDown, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { OrderViewSheet } from "@/components/order-view-sheet"
-import { getStatusConfig } from "@/lib/status" // 🔥 NEW
+import { getStatusConfig } from "@/lib/status"
 
 import {
   Card,
@@ -17,17 +17,13 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Package } from "lucide-react"
 
-import { OrdersFilters } from "@/components/orders-filters"
 import { DeleteOrderButton } from "@/components/delete-order-button"
 
-export default async function OrdersPage({
+export default async function CheckPage({
   searchParams,
 }: {
   searchParams: Promise<{
     search?: string
-    status?: string
-    payment?: string
-    city?: string
     sort?: string
     order?: string
     page?: string
@@ -46,32 +42,28 @@ export default async function OrdersPage({
 
   const params = await searchParams
 
-  // pagination
   const page = Number(params.page || "1")
   const limit = Number(params.limit || "20")
 
   const from = (page - 1) * limit
   const to = from + limit - 1
 
-  // sorting
   const sort = params.sort || "created_at"
   const ascending = params.order === "asc"
 
+  // 🔥 FORCE STATUS = a verifier
   let query = supabase
     .from("orders")
     .select("*", { count: "exact" })
     .eq("user_id", user.id)
+    .eq("status", "a verifier")
 
-  // filters
+  // 🔍 SEARCH ONLY
   if (params.search) {
     query = query.or(
       `name.ilike.%${params.search}%,number.ilike.%${params.search}%`
     )
   }
-
-  if (params.status) query = query.eq("status", params.status)
-  if (params.payment) query = query.eq("payment", params.payment)
-  if (params.city) query = query.eq("city", params.city)
 
   query = query.order(sort, { ascending })
   query = query.range(from, to)
@@ -103,11 +95,9 @@ export default async function OrdersPage({
 
   const sortIcon = (field: string) => {
     if (params.sort !== field) return null
-    return params.order === "asc" ? (
-      <ArrowUp className="h-3 w-3" />
-    ) : (
-      <ArrowDown className="h-3 w-3" />
-    )
+    return params.order === "asc"
+      ? <ArrowUp className="h-3 w-3" />
+      : <ArrowDown className="h-3 w-3" />
   }
 
   return (
@@ -116,30 +106,20 @@ export default async function OrdersPage({
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Orders</h1>
+          <h1 className="text-3xl font-bold mb-2">À vérifier</h1>
           <p className="text-muted-foreground">
-            Manage and track your customer orders
+            Commandes nécessitant une vérification
           </p>
         </div>
-
-        {/* Filters */}
-        <OrdersFilters filters={params} />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Orders List</CardTitle>
+              <CardTitle>Liste des commandes</CardTitle>
               <CardDescription>
-                All orders from your customers
+                Toutes les commandes à vérifier
               </CardDescription>
             </div>
-
-            <OrderViewSheet mode="create" order={{}}>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter commande
-              </Button>
-            </OrderViewSheet>
           </CardHeader>
 
           <CardContent>
@@ -150,45 +130,13 @@ export default async function OrdersPage({
 
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="p-3 text-left">
-                        <Link href={buildUrl("name")} className="flex items-center gap-1 hover:text-primary">
-                          Client {sortIcon("name")}
-                        </Link>
-                      </th>
-
+                      <th className="p-3 text-left">Client</th>
                       <th className="p-3 text-left">Phone</th>
-
-                      <th className="p-3 text-left">
-                        <Link href={buildUrl("city")} className="flex items-center gap-1 hover:text-primary">
-                          City {sortIcon("city")}
-                        </Link>
-                      </th>
-
-                      <th className="p-3 text-left">
-                        <Link href={buildUrl("quantity")} className="flex items-center gap-1 hover:text-primary">
-                          Qty {sortIcon("quantity")}
-                        </Link>
-                      </th>
-
-                      <th className="p-3 text-left">Colis</th>
-
-                      <th className="p-3 text-left">
-                        <Link href={buildUrl("total")} className="flex items-center gap-1 hover:text-primary">
-                          Total {sortIcon("total")}
-                        </Link>
-                      </th>
-
-                      <th className="p-3 text-left">Status</th>
-                      <th className="p-3 text-left">Payment</th>
-                      <th className="p-3 text-left">Livreur</th>
-
-                      <th className="p-3 text-left">
-                        <Link href={buildUrl("created_at")} className="flex items-center gap-1 hover:text-primary">
-                          Date {sortIcon("created_at")}
-                        </Link>
-                      </th>
-
-                      <th className="p-3 text-left">Actions</th>
+                      <th className="p-3 text-left">City</th>
+                      <th className="p-3 text-left">Total</th>
+                      <th className="p-3 text-left">Commentaire</th> {/* 🔥 NEW */}
+                      <th className="p-3 text-left">Date</th>
+                      <th className="p-3 text-left"></th>
                     </tr>
                   </thead>
 
@@ -202,35 +150,13 @@ export default async function OrdersPage({
                           <td className="p-3 font-medium">{order.name}</td>
                           <td className="p-3">{order.number}</td>
                           <td className="p-3">{order.city}</td>
-                          <td className="p-3">{order.quantity}</td>
-                          <td className="p-3">{order.nbr_colis}</td>
                           <td className="p-3 font-medium">{order.total} DT</td>
 
-                          {/* ✅ STATUS (FIXED) */}
-                          <td className="p-3">
-                            <Badge className={status.className}>
-                              {status.label}
-                            </Badge>
+                          {/* 🔥 COMMENT COLUMN */}
+                          <td className="p-3 text-muted-foreground">
+                            {order.comment || "-"}
                           </td>
 
-                          {/* PAYMENT */}
-                          <td className="p-3">
-                            <Badge className={
-                              order.payment === "payé"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }>
-                              {order.payment || "non payé"}
-                            </Badge>
-                          </td>
-
-                          <td className="p-3">
-                            <Badge variant="secondary">
-                              {order.livreur_id ? "Assigned" : "Unassigned"}
-                            </Badge>
-                          </td>
-
-                          {/* ✅ DATE FIX */}
                           <td className="p-3">
                             {new Date(order.created_at).toLocaleDateString("fr-FR")}
                           </td>
@@ -243,14 +169,6 @@ export default async function OrdersPage({
                                   <Eye className="h-4 w-4" />
                                 </button>
                               </OrderViewSheet>
-
-                              <OrderViewSheet mode="edit" order={order}>
-                                <button className="text-muted-foreground hover:text-blue-600">
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                              </OrderViewSheet>
-
-                              <DeleteOrderButton id={order.id} page={safePage} />
 
                             </div>
                           </td>
@@ -267,7 +185,7 @@ export default async function OrdersPage({
               <div className="text-center py-12">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  No orders yet
+                  Aucune commande à vérifier
                 </p>
               </div>
             )}

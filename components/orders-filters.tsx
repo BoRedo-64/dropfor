@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { Search } from "lucide-react"
+import { STATUS_CONFIG } from "@/lib/status" // 🔥 NEW
 
 export function OrdersFilters() {
   const router = useRouter()
@@ -32,13 +33,12 @@ export function OrdersFilters() {
       else newParams.set(key, value)
     })
 
-    // ✅ ALWAYS reset pagination when filtering
     newParams.set("page", "1")
 
     router.push(`/account/orders?${newParams.toString()}`)
   }
 
-  // ✅ debounce search
+  // debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       updateParams({ search })
@@ -62,7 +62,7 @@ export function OrdersFilters() {
         />
       </div>
 
-      {/* Status */}
+      {/* 🔥 STATUS (DYNAMIC) */}
       <Select
         value={status || undefined}
         onValueChange={(v) => {
@@ -70,18 +70,19 @@ export function OrdersFilters() {
           updateParams({ status: v })
         }}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Statut" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="shipped">Shipped</SelectItem>
-          <SelectItem value="delivered">Delivered</SelectItem>
-          <SelectItem value="returned">Returned</SelectItem>
+          {Object.entries(STATUS_CONFIG).map(([key, value]) => (
+            <SelectItem key={key} value={key}>
+              {value.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
-      {/* Payment */}
+      {/* 🔥 PAYMENT (MATCH DB) */}
       <Select
         value={payment || undefined}
         onValueChange={(v) => {
@@ -93,12 +94,12 @@ export function OrdersFilters() {
           <SelectValue placeholder="Paiement" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="paid">Paid</SelectItem>
-          <SelectItem value="unpaid">Unpaid</SelectItem>
+          <SelectItem value="payé">Payé</SelectItem>
+          <SelectItem value="non payé">Non payé</SelectItem>
         </SelectContent>
       </Select>
 
-      {/* City */}
+      {/* CITY (keep simple for now) */}
       <Select
         value={city || undefined}
         onValueChange={(v) => {
@@ -107,12 +108,12 @@ export function OrdersFilters() {
         }}
       >
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder="City" />
+          <SelectValue placeholder="Ville" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="tunis">Tunis</SelectItem>
-          <SelectItem value="sfax">Sfax</SelectItem>
-          <SelectItem value="sousse">Sousse</SelectItem>
+          <SelectItem value="Tunis">Tunis</SelectItem>
+          <SelectItem value="Sfax">Sfax</SelectItem>
+          <SelectItem value="Sousse">Sousse</SelectItem>
         </SelectContent>
       </Select>
 
@@ -128,7 +129,7 @@ export function OrdersFilters() {
           router.push("/account/orders?page=1")
         }}
       >
-        Clear filters
+        Reset
       </Button>
 
     </div>

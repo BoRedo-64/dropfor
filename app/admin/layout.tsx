@@ -20,32 +20,24 @@ import {
 import {
   LayoutDashboard,
   ShoppingCart,
-  CreditCard,
   Package,
-  AlertTriangle,
-  Clock,
-  RotateCcw,
-  Headphones,
-  CheckCircle,
   Truck,
-  Megaphone,
+  PackagePlus,
 } from 'lucide-react'
 
-export default function AccountLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const pathname = usePathname()
 
-  const [userName, setUserName] = useState("User")
-  const [initials, setInitials] = useState("U")
+  const [userName, setUserName] = useState("Admin")
+  const [initials, setInitials] = useState("A")
 
+  // 🔥 COUNTS
   const [counts, setCounts] = useState({
-    pending: 0,
-    returns: 0,
-    check: 0,
-    payments: 0,
+    pickups: 0,
   })
 
   useEffect(() => {
@@ -58,6 +50,7 @@ export default function AccountLayout({
 
       if (!user) return
 
+      // 👤 NAME
       const firstName = user.user_metadata?.first_name || ""
       const lastName = user.user_metadata?.last_name || ""
 
@@ -75,25 +68,18 @@ export default function AccountLayout({
         setInitials(initials)
       }
 
-      const { data: orders } = await supabase
-        .from("orders")
-        .select("status, payment")
+      // 🔥 PICKUPS COUNT (pending only)
+      const { data: pickups } = await supabase
+        .from("pickups")
+        .select("status")
 
-      if (!orders) return
+      let pickupsCount = 0
 
-      let pending = 0
-      let returns = 0
-      let check = 0
-      let payments = 0
-
-      orders.forEach((o) => {
-        if (o.status === "en attente") pending++
-        if (o.status === "retour") returns++
-        if (o.status === "a verifier") check++
-        if (o.payment === "non payé") payments++
+      pickups?.forEach((p) => {
+        if (p.status === "pending") pickupsCount++
       })
 
-      setCounts({ pending, returns, check, payments })
+      setCounts({ pickups: pickupsCount })
     }
 
     fetchData()
@@ -103,45 +89,20 @@ export default function AccountLayout({
     {
       title: "Général",
       items: [
-        { title: "Tableau de bord", href: "/account", icon: LayoutDashboard },
+        { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
       ],
     },
     {
-      title: "Commandes",
+      title: "Gestion",
       items: [
-        { title: "Toutes les commandes", href: "/account/orders", icon: ShoppingCart },
-        { title: "À vérifier", href: "/account/check", icon: AlertTriangle, badge: counts.check },
-        { title: "Retour", href: "/account/returns", icon: RotateCcw, badge: counts.returns },
-      ],
-    },
-    {
-      title: "Collecte",
-      items: [
-        { title: "Commandes en attente", href: "/account/pending", icon: Clock, badge: counts.pending },
-        { title: "Pickup", href: "/account/pickups", icon: Package },
-      ],
-    },
-
-    // ✅ RESTORED SERVICES
-    {
-      title: "Services",
-      items: [
-        { title: "Confirmations", href: "/account/confirmation", icon: CheckCircle },
-        { title: "Fulfillment", href: "/account/fulfillment", icon: Truck },
-        { title: "Marketing", href: "/account/marketing", icon: Megaphone },
-      ],
-    },
-
-    {
-      title: "Finance",
-      items: [
-        { title: "Paiement", href: "/account/payments", icon: CreditCard, badge: counts.payments },
-      ],
-    },
-    {
-      title: "Support",
-      items: [
-        { title: "Service Client", href: "/account/support", icon: Headphones },
+        { title: "Commandes", href: "/admin/orders", icon: ShoppingCart },
+        { title: "Ajouter Stock", href: "/admin/stock", icon: PackagePlus },
+        {
+          title: "Pickups",
+          href: "/admin/pickups",
+          icon: Truck,
+          badge: counts.pickups, // 🔴 ALERT
+        },
       ],
     },
   ]
@@ -150,6 +111,7 @@ export default function AccountLayout({
     <SidebarProvider>
       <Sidebar collapsible="icon" className="border-r">
 
+        {/* HEADER */}
         <SidebarHeader>
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center">
@@ -157,11 +119,12 @@ export default function AccountLayout({
             </div>
 
             <span className="text-xl font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
-              Dropfor
+              Dropfor Admin
             </span>
           </div>
         </SidebarHeader>
 
+        {/* CONTENT */}
         <SidebarContent className="px-2">
 
           {sections.map((section) => (
@@ -191,6 +154,7 @@ export default function AccountLayout({
                           className="flex items-center justify-between px-4 w-full"
                         >
 
+                          {/* LEFT */}
                           <div className="flex items-center gap-4">
                             <Icon className="!h-5 !w-5" />
                             <span className="group-data-[collapsible=icon]:hidden">
@@ -198,6 +162,7 @@ export default function AccountLayout({
                             </span>
                           </div>
 
+                          {/* 🔴 BADGE */}
                           {link.badge > 0 && (
                             <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
                               {link.badge}
@@ -218,6 +183,7 @@ export default function AccountLayout({
 
         </SidebarContent>
 
+        {/* FOOTER */}
         <SidebarFooter className="border-t">
           <div className="flex items-center gap-3 px-4 py-4">
 
@@ -228,7 +194,7 @@ export default function AccountLayout({
             <div className="group-data-[collapsible=icon]:hidden">
               <p className="text-sm font-medium">{userName}</p>
               <p className="text-xs text-muted-foreground">
-                Expéditeur
+                Administrateur
               </p>
             </div>
 
@@ -237,6 +203,7 @@ export default function AccountLayout({
 
       </Sidebar>
 
+      {/* PAGE */}
       <SidebarInset>
         <main className="flex-1 overflow-auto p-6">
           {children}

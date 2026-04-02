@@ -1,5 +1,6 @@
 "use client"
 
+import { getStatusConfig, OrderStatus } from "@/lib/status"
 import { useEffect, useState } from "react"
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle
@@ -14,45 +15,21 @@ import {
 
 import { Package, Phone, MapPin, Calendar } from "lucide-react"
 
-type Status = "en attente" | "au depot" | "en cours" | "livré" | "retour"
-
 type Order = {
   id: string
   order_number: number
   name: string
   number: string
   city: string
-  status: Status
+  status: string
   created_at: string
-}
-
-const statusConfig: Record<Status, { label: string; className: string }> = {
-  "en attente": {
-    label: "En attente",
-    className: "bg-yellow-100 text-yellow-800",
-  },
-  "au depot": {
-    label: "Au dépôt",
-    className: "bg-gray-100 text-gray-800",
-  },
-  "en cours": {
-    label: "En cours",
-    className: "bg-blue-100 text-blue-800",
-  },
-  "livré": {
-    label: "Livré",
-    className: "bg-green-100 text-green-800",
-  },
-  "retour": {
-    label: "Retour",
-    className: "bg-red-100 text-red-800",
-  },
 }
 
 export function LivreurDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [orderNumber, setOrderNumber] = useState("")
-  const [status, setStatus] = useState<Status>("en attente")
+  const [status, setStatus] = useState<OrderStatus | "">("") // ✅ FIXED
+  const [comment, setComment] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function fetchOrders() {
@@ -74,21 +51,28 @@ export function LivreurDashboard() {
   }, [])
 
   async function handleUpdateStatus() {
-    if (!orderNumber.trim()) return
+    if (!orderNumber.trim() || !status) return
 
     await fetch("/api/livreur/update-status", {
       method: "POST",
       body: JSON.stringify({
         order_number: Number(orderNumber),
         status,
+        comment,
       }),
     })
 
     setOrderNumber("")
-    setStatus("en attente")
+    setStatus("")
+    setComment("")
 
     fetchOrders()
   }
+
+  const showComment =
+    status === "retour" ||
+    status === "a relancer" ||
+    status === "a verifier"
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,7 +102,7 @@ export function LivreurDashboard() {
             <div>
               <Label>Order Number</Label>
               <Input
-                placeholder="Enter order number (e.g. 1023)"
+                placeholder="Enter order number"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
               />
@@ -126,19 +110,35 @@ export function LivreurDashboard() {
 
             <div>
               <Label>Status</Label>
-              <Select value={status} onValueChange={(v: Status) => setStatus(v)}>
+              <Select
+                value={status || undefined}
+                onValueChange={(v: OrderStatus) => setStatus(v)}
+              >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
+
+                {/* ✅ USE CENTRALIZED STATUSES */}
                 <SelectContent>
-                  <SelectItem value="en attente">En attente</SelectItem>
-                  <SelectItem value="au depot">Au dépôt</SelectItem>
+                  <SelectItem value="a verifier">A vérifier</SelectItem>
+                  <SelectItem value="a relancer">A relancer</SelectItem>
                   <SelectItem value="en cours">En cours</SelectItem>
                   <SelectItem value="livré">Livré</SelectItem>
                   <SelectItem value="retour">Retour</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {showComment && (
+              <div>
+                <Label>Commentaire</Label>
+                <textarea
+                  className="w-full border rounded-md p-2 text-sm"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
+            )}
 
             <Button onClick={handleUpdateStatus} className="w-full">
               Update Status
@@ -159,46 +159,46 @@ export function LivreurDashboard() {
             {orders
               .filter((order) => order.status !== "livré")
               .map((order) => {
-              const config = statusConfig[order.status]
+                const config = getStatusConfig(order.status)
 
-              return (
-                <Card key={order.id}>
-                  <CardContent className="pt-4 space-y-2">
+                return (
+                  <Card key={order.id}>
+                    <CardContent className="pt-4 space-y-2">
 
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-semibold">
-                          #{order.order_number}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {order.name}
-                        </p>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-semibold">
+                            #{order.order_number}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {order.name}
+                          </p>
+                        </div>
+
+                        <Badge className={config.className}>
+                          {config.label}
+                        </Badge>
                       </div>
 
-                      <Badge className={config.className}>
-                        {config.label}
-                      </Badge>
-                    </div>
+                      <div className="text-sm space-y-1">
+                        <div className="flex gap-2">
+                          <Phone className="w-4 h-4" />
+                          {order.number}
+                        </div>
+                        <div className="flex gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {order.city}
+                        </div>
+                        <div className="flex gap-2 text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(order.created_at).toLocaleDateString("fr-FR")}
+                        </div>
+                      </div>
 
-                    <div className="text-sm space-y-1">
-                      <div className="flex gap-2">
-                        <Phone className="w-4 h-4" />
-                        {order.number}
-                      </div>
-                      <div className="flex gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {order.city}
-                      </div>
-                      <div className="flex gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-
-                  </CardContent>
-                </Card>
-              )
-            })}
+                    </CardContent>
+                  </Card>
+                )
+              })}
           </div>
 
           {/* DESKTOP */}
@@ -221,27 +221,27 @@ export function LivreurDashboard() {
                     {orders
                       .filter((order) => order.status !== "livré")
                       .map((order) => {
-                      const config = statusConfig[order.status]
+                        const config = getStatusConfig(order.status)
 
-                      return (
-                        <tr key={order.id} className="border-t">
-                          <td className="p-3 font-medium">
-                            #{order.order_number}
-                          </td>
-                          <td className="p-3">{order.name}</td>
-                          <td className="p-3">{order.number}</td>
-                          <td className="p-3">{order.city}</td>
-                          <td className="p-3">
-                            <Badge className={config.className}>
-                              {config.label}
-                            </Badge>
-                          </td>
-                          <td className="p-3">
-                            {new Date(order.created_at).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      )
-                    })}
+                        return (
+                          <tr key={order.id} className="border-t">
+                            <td className="p-3 font-medium">
+                              #{order.order_number}
+                            </td>
+                            <td className="p-3">{order.name}</td>
+                            <td className="p-3">{order.number}</td>
+                            <td className="p-3">{order.city}</td>
+                            <td className="p-3">
+                              <Badge className={config.className}>
+                                {config.label}
+                              </Badge>
+                            </td>
+                            <td className="p-3">
+                              {new Date(order.created_at).toLocaleDateString("fr-FR")}
+                            </td>
+                          </tr>
+                        )
+                      })}
                   </tbody>
 
                 </table>

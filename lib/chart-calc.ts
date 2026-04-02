@@ -43,7 +43,7 @@ export async function getOrdersChartData() {
     if (daysMap[key]) {
       daysMap[key].total += 1
 
-      if (o.status === "returned") {
+      if (o.status === "retour") {
         daysMap[key].returns += 1
       }
     }

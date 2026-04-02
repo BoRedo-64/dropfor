@@ -20,7 +20,7 @@ export function LayoutClient({
 
       <main className="flex-1">{children}</main>
 
-      {!isAccountPage && <Footer />}
+      {!isAccountPage && !isAdminPage && !isDeliveryPage && <Footer />}
     </>
   )
 }
