@@ -14,13 +14,20 @@ export async function POST(req: NextRequest) {
   }
 
   const parsedNumber = Number(order_number)
-  console.log("RAW:", order_number)
-  console.log("PARSED:", Number(order_number))
+
+  if (isNaN(parsedNumber)) {
+    return NextResponse.json(
+      { error: "Invalid order number" },
+      { status: 400 }
+    )
+  }
+
+  // 🔥 1. UPDATE ORDER
   const { data, error } = await supabase
     .from("orders")
     .update({ status: "au depot" })
     .eq("order_number", parsedNumber)
-    .eq("status", "pickup demandé")
+    .ilike("status", "pickup%") // safer match
     .select()
 
   if (error) {
@@ -33,9 +40,44 @@ export async function POST(req: NextRequest) {
   // ❗ nothing updated
   if (!data || data.length === 0) {
     return NextResponse.json(
-      { error: "Order not in pickup demandé state" },
+      { error: "Order not in pickup state" },
       { status: 400 }
     )
+  }
+
+  const order = data[0]
+
+  // 🔥 2. GET PICKUP ID
+  const pickupId = order.pickup_id
+
+  if (!pickupId) {
+    return NextResponse.json({ success: true })
+  }
+
+  // 🔥 3. GET ALL ORDERS IN THIS PICKUP
+  const { data: pickupOrders, error: pickupError } = await supabase
+    .from("orders")
+    .select("status")
+    .eq("pickup_id", pickupId)
+
+  if (pickupError || !pickupOrders) {
+    return NextResponse.json({ success: true })
+  }
+
+  // 🔥 4. CHECK IF ALL ARE "au depot"
+  const allDone = pickupOrders.every(
+    (o) => o.status === "au depot"
+  )
+
+  // 🔥 5. UPDATE PICKUP IF COMPLETE
+  if (allDone) {
+    await supabase
+      .from("pickups")
+      .update({
+        status: "done",
+        completed_at: new Date().toISOString(), // optional
+      })
+      .eq("id", pickupId)
   }
 
   return NextResponse.json({ success: true })
