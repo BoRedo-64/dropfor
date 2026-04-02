@@ -56,7 +56,12 @@ export default function StockPage() {
             onScan={(result) => {
               if (result?.[0]?.rawValue) {
                 const text = result[0].rawValue
-                const number = text.replace("ORDER-", "")
+
+                let number = text
+
+                if (text.startsWith("ORDER-")) {
+                  number = text.replace("ORDER-", "")
+                }
 
                 updateOrder(number)
                 setScanning(false)

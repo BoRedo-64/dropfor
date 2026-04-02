@@ -15,9 +15,11 @@ export function PendingTable({
 }) {
   const [selected, setSelected] = useState<string[]>([])
 
-  function handleBulkPrint() {
+  async function handleBulkPrint() {
     const selectedOrders = orders.filter(o => selected.includes(o.id))
     if (selectedOrders.length === 0) return
+
+    const QRCode = await import("qrcode")
 
     const win = window.open("", "_blank")
     if (!win) return
@@ -27,28 +29,38 @@ export function PendingTable({
     for (let i = 0; i < selectedOrders.length; i += 2) {
       const chunk = selectedOrders.slice(i, i + 2)
 
-      const labels = chunk.map(order => `
-        <div class="label">
+      const labels = await Promise.all(
+        chunk.map(async (order) => {
+          const qr = await QRCode.toDataURL(`ORDER-${order.order_number}`)
 
-          <div class="header">
-            <div>EXPÉDITEUR: ${senderName}</div>
-            <div>Commande #: ${order.order_number}</div>
-          </div>
+          return `
+            <div class="label">
 
-          <div class="section">
-            <div><b>Nom:</b> ${order.name}</div>
-            <div><b>Téléphone:</b> ${order.number}</div>
-            <div><b>Ville:</b> ${order.city}</div>
-            <div><b>Adresse:</b> ${order.adress}</div>
-          </div>
+              <div class="header">
+                <div>EXPÉDITEUR: ${senderName}</div>
+                <div>Commande #: ${order.order_number}</div>
+              </div>
 
-          <div class="bottom">${order.total} DT</div>
-        </div>
-      `).join("")
+              <div class="section">
+                <div><b>Nom:</b> ${order.name}</div>
+                <div><b>Téléphone:</b> ${order.number}</div>
+                <div><b>Ville:</b> ${order.city}</div>
+                <div><b>Adresse:</b> ${order.adress}</div>
+              </div>
+
+              <div class="qr">
+                <img src="${qr}" />
+              </div>
+
+              <div class="bottom">${order.total} DT</div>
+            </div>
+          `
+        })
+      )
 
       pages.push(`
         <div class="page">
-          ${labels}
+          ${labels.join("")}
         </div>
       `)
     }
@@ -57,7 +69,10 @@ export function PendingTable({
       <html>
         <head>
           <style>
-            body { font-family: Arial; margin: 0; }
+            body {
+              font-family: Arial;
+              margin: 0;
+            }
 
             .page {
               height: 100vh;
@@ -87,6 +102,17 @@ export function PendingTable({
             .section {
               font-size: 16px;
               line-height: 1.6;
+            }
+
+            .qr {
+              display: flex;
+              justify-content: center;
+              margin-top: 10px;
+            }
+
+            .qr img {
+              width: 120px;
+              height: 120px;
             }
 
             .bottom {
@@ -140,11 +166,7 @@ export function PendingTable({
       }
 
       alert("Pickup demandé avec succès ✅")
-
-      // reset selection
       setSelected([])
-
-      // 🔥 refresh page
       window.location.reload()
 
     } catch (err) {
@@ -153,14 +175,12 @@ export function PendingTable({
     }
   }
 
-
   return (
     <div>
 
-      {/* 🔥 ACTION BUTTONS RIGHT */}
+      {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-3 mb-4">
 
-        {/* DEMANDER PICKUP */}
         <button
           onClick={handlePickupRequest}
           className="px-4 py-2 border rounded hover:bg-muted"
@@ -168,8 +188,6 @@ export function PendingTable({
           Demander pickup
         </button>
 
-
-        {/* PRINT */}
         <button
           onClick={handleBulkPrint}
           className="px-4 py-2 bg-black text-white rounded flex items-center justify-center"
