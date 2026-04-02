@@ -2,16 +2,25 @@
 
 import { QrReader } from "react-qr-reader"
 
-export default function QRScanner({ onScan }) {
+type Props = {
+  onScan: (value: string) => void
+}
+
+export default function QRScanner({ onScan }: Props) {
   return (
     <QrReader
-      constraints={{ facingMode: "environment" }}
+      constraints={{
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }}
       onResult={(result, error) => {
-        if (!!result) {
-          onScan(result?.text)
+        if (result) {
+          const text = result.getText()
+          onScan(text)
         }
       }}
-      style={{ width: "100%" }}
+      containerStyle={{ width: "100%" }}
     />
   )
 }
