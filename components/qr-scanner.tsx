@@ -1,6 +1,6 @@
 "use client"
 
-import { QrReader } from "react-qr-reader"
+import { Scanner } from "@yudiel/react-qr-scanner"
 
 type Props = {
   onScan: (value: string) => void
@@ -8,19 +8,30 @@ type Props = {
 
 export default function QRScanner({ onScan }: Props) {
   return (
-    <QrReader
-      constraints={{
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }}
-      onResult={(result, error) => {
-        if (result) {
-          const text = result.getText()
-          onScan(text)
-        }
-      }}
-      containerStyle={{ width: "100%" }}
-    />
+    <div className="w-full max-w-md mx-auto overflow-hidden rounded-lg border">
+
+      <Scanner
+        onScan={(result) => {
+          if (result?.[0]?.rawValue) {
+            onScan(result[0].rawValue)
+          }
+        }}
+        onError={(err) => console.log(err)}
+        constraints={{
+          facingMode: "environment",
+        }}
+        styles={{
+          container: {
+            width: "100%",
+          },
+          video: {
+            width: "100%",
+            height: "300px",
+            objectFit: "cover",
+          },
+        }}
+      />
+
+    </div>
   )
 }
