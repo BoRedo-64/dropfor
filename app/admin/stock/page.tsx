@@ -52,21 +52,26 @@ export default function StockPage() {
       {scanning && (
         <div className="mt-4 border rounded-md overflow-hidden">
 
-          <QrReader
+            <QrReader
             constraints={{ facingMode: "environment" }}
+            containerStyle={{ width: "100%", height: "300px" }}
+            videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+            videoProps={{
+                autoPlay: true,
+                muted: true,
+                playsInline: true,
+            }}
             onResult={(result, error) => {
-              if (!!result) {
+                if (result) {
                 const text = result.getText()
-
                 const number = text.replace("ORDER-", "")
 
                 updateOrder(number)
-
-                setScanning(false) // stop camera
-              }
+                setScanning(false)
+                }
             }}
-            style={{ width: "100%" }}
-          />
+            />
+
 
           <button
             onClick={() => setScanning(false)}
