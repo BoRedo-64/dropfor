@@ -13,12 +13,14 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 🔥 ONLY update pickup requested orders
+  const parsedNumber = Number(order_number)
+
   const { data, error } = await supabase
     .from("orders")
     .update({ status: "au depot" })
-    .eq("order_number", order_number)
-    .eq("status", "pickup demandé") // ✅ IMPORTANT
+    .eq("order_number", parsedNumber) // ✅ number
+    .eq("status", "pickup demandé")
+    .select()
 
   if (error) {
     return NextResponse.json(
