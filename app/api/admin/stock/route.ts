@@ -75,7 +75,6 @@ export async function POST(req: NextRequest) {
       .from("pickups")
       .update({
         status: "done",
-        completed_at: new Date().toISOString(), // optional
       })
       .eq("id", pickupId)
   }
