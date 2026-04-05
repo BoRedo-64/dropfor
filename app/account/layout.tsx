@@ -58,8 +58,15 @@ export default function AccountLayout({
 
       if (!user) return
 
-      const firstName = user.user_metadata?.first_name || ""
-      const lastName = user.user_metadata?.last_name || ""
+      // 👤 FETCH PROFILE (IMPORTANT FIX)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", user.id)
+        .single()
+
+      const firstName = profile?.first_name || ""
+      const lastName = profile?.last_name || ""
 
       const fullName = `${firstName} ${lastName}`.trim()
 
