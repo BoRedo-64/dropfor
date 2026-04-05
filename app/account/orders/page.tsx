@@ -158,7 +158,7 @@ export default async function OrdersPage({
 
                       <th className="p-3 text-left">
                         <Link href={buildUrl("city")} className="flex items-center gap-1 hover:text-primary">
-                          City {sortIcon("city")}
+                          Adresse {sortIcon("city")}
                         </Link>
                       </th>
 
@@ -199,7 +199,9 @@ export default async function OrdersPage({
 
                           <td className="p-3 font-medium">{order.name}</td>
                           <td className="p-3">{order.number}</td>
-                          <td className="p-3">{order.city}</td>
+                          <td className="p-3">
+                            {[order.city, order.adress].filter(Boolean).join(", ")}
+                          </td>
                           <td className="p-3">{order.quantity}</td>
                           <td className="p-3">{order.content}</td>
                           <td className="p-3 font-medium">{order.total} DT</td>

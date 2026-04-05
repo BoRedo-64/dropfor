@@ -15,6 +15,15 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
+
+import { TUNISIA_CITIES } from "@/lib/cities"
 
 type OrderSheetMode = "view" | "create" | "edit"
 
@@ -245,13 +254,24 @@ export function OrderViewSheet({
                     </FormField>
                     <div className="col-span-2">
                       <FormField label="City">
-                        <Input
-                          placeholder="City"
+                        <Select
                           value={formData.city || ""}
-                          onChange={(e) =>
-                            handleInputChange("city", e.target.value)
+                          onValueChange={(value) =>
+                            handleInputChange("city", value)
                           }
-                        />
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choisir une ville" />
+                          </SelectTrigger>
+
+                          <SelectContent>
+                            {TUNISIA_CITIES.map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormField>
                     </div>
                     <div className="col-span-2">
