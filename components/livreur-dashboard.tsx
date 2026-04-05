@@ -21,6 +21,7 @@ type Order = {
   name: string
   number: string
   city: string
+  adress: string
   status: string
   created_at: string
 }
@@ -189,6 +190,10 @@ export function LivreurDashboard() {
                           <MapPin className="w-4 h-4" />
                           {order.city}
                         </div>
+                        <div className="flex gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {order.adress}
+                        </div>
                         <div className="flex gap-2 text-muted-foreground">
                           <Calendar className="w-4 h-4" />
                           {new Date(order.created_at).toLocaleDateString("fr-FR")}
@@ -212,6 +217,7 @@ export function LivreurDashboard() {
                       <th className="p-3 text-left">Client</th>
                       <th className="p-3 text-left">Phone</th>
                       <th className="p-3 text-left">City</th>
+                      <th className="p-3 text-left">Adress</th>
                       <th className="p-3 text-left">Status</th>
                       <th className="p-3 text-left">Date</th>
                     </tr>
@@ -231,6 +237,7 @@ export function LivreurDashboard() {
                             <td className="p-3">{order.name}</td>
                             <td className="p-3">{order.number}</td>
                             <td className="p-3">{order.city}</td>
+                            <td className="p-3">{order.adress}</td>
                             <td className="p-3">
                               <Badge className={config.className}>
                                 {config.label}
