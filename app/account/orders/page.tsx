@@ -16,9 +16,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Package } from "lucide-react"
-
 import { OrdersFilters } from "@/components/orders-filters"
-import { DeleteOrderButton } from "@/components/delete-order-button"
 
 export default async function OrdersPage({
   searchParams,
@@ -188,7 +186,7 @@ export default async function OrdersPage({
                         </Link>
                       </th>
 
-                      <th className="p-3 text-left">Actions</th>
+                      <th className="p-3 text-left"></th>
                     </tr>
                   </thead>
 
@@ -203,7 +201,7 @@ export default async function OrdersPage({
                           <td className="p-3">{order.number}</td>
                           <td className="p-3">{order.city}</td>
                           <td className="p-3">{order.quantity}</td>
-                          <td className="p-3">{order.nbr_colis}</td>
+                          <td className="p-3">{order.content}</td>
                           <td className="p-3 font-medium">{order.total} DT</td>
 
                           {/* ✅ STATUS (FIXED) */}
@@ -239,18 +237,10 @@ export default async function OrdersPage({
                             <div className="flex items-center gap-3">
 
                               <OrderViewSheet mode="view" order={order}>
-                                <button className="text-muted-foreground hover:text-primary">
+                                <button className="text-muted-foreground hover:text-primary h-6 w-6">
                                   <Eye className="h-4 w-4" />
                                 </button>
                               </OrderViewSheet>
-
-                              <OrderViewSheet mode="edit" order={order}>
-                                <button className="text-muted-foreground hover:text-blue-600">
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                              </OrderViewSheet>
-
-                              <DeleteOrderButton id={order.id} page={safePage} />
 
                             </div>
                           </td>

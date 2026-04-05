@@ -2,93 +2,146 @@
 
 import { useState } from "react"
 import { Scanner } from "@yudiel/react-qr-scanner"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Camera, Loader2 } from "lucide-react"
 
 export default function StockPage() {
   const [orderNumber, setOrderNumber] = useState("")
   const [scanning, setScanning] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   async function updateOrder(number: string) {
     if (!number) return
 
-    await fetch("/api/admin/stock", {
-      method: "POST",
-      body: JSON.stringify({ order_number: number }),
-    })
+    try {
+      setLoading(true)
 
-    alert("✅ Order moved to dépôt")
+      const res = await fetch("/api/admin/stock", {
+        method: "POST",
+        body: JSON.stringify({ order_number: number }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        alert(data.error || "Erreur")
+        return
+      }
+
+      alert("✅ Commande ajoutée au dépôt")
+
+      setOrderNumber("")
+    } catch (err) {
+      console.error(err)
+      alert("Erreur serveur")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="space-y-6 max-w-xl">
+    <div className="py-10 flex justify-center">
+      <div className="w-full max-w-xl">
 
-      <h1 className="text-2xl font-bold">Ajouter Stock</h1>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ajouter au dépôt</CardTitle>
+          </CardHeader>
 
-      {/* INPUT */}
-      <div className="space-y-2">
-        <input
-          placeholder="Numéro de commande"
-          value={orderNumber}
-          onChange={(e) => setOrderNumber(e.target.value)}
-          className="border rounded-md p-2 w-full"
-        />
+          <CardContent className="space-y-6">
 
-        <button
-          onClick={() => updateOrder(orderNumber)}
-          className="bg-primary text-white px-4 py-2 rounded-md"
-        >
-          Valider
-        </button>
+            {/* INPUT */}
+            <div className="space-y-2">
+              <Input
+                placeholder="Numéro de commande"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
+              />
+
+              <Button
+                onClick={() => updateOrder(orderNumber)}
+                className="w-full"
+                disabled={loading}
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Valider
+              </Button>
+            </div>
+
+            {/* CAMERA BUTTON */}
+            <Button
+              onClick={() => setScanning(true)}
+              className="w-full flex items-center gap-2"
+              variant="secondary"
+            >
+              <Camera className="h-5 w-5" />
+              Scanner avec la caméra
+            </Button>
+
+          </CardContent>
+        </Card>
+
+        {/* SCANNER MODAL STYLE */}
+        {scanning && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+
+            <div className="bg-white rounded-lg overflow-hidden w-full max-w-md">
+
+              <div className="p-4 border-b flex justify-between items-center">
+                <p className="font-medium">Scanner QR Code</p>
+
+                <button
+                  onClick={() => setScanning(false)}
+                  className="text-sm text-muted-foreground"
+                >
+                  Fermer
+                </button>
+              </div>
+
+              <Scanner
+                onScan={(result) => {
+                  if (result?.[0]?.rawValue) {
+                    const text = result[0].rawValue
+
+                    let number = text
+
+                    if (text.startsWith("ORDER-")) {
+                      number = text.replace("ORDER-", "")
+                    }
+
+                    updateOrder(number)
+                    setScanning(false)
+                  }
+                }}
+                onError={(err) => console.log(err)}
+                constraints={{ facingMode: "environment" }}
+                styles={{
+                  container: { width: "100%" },
+                  video: {
+                    width: "100%",
+                    height: "300px",
+                    objectFit: "cover",
+                  },
+                }}
+              />
+
+              <div className="p-4">
+                <Button
+                  onClick={() => setScanning(false)}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  Arrêter
+                </Button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
-
-      {/* BUTTON */}
-      <button
-        onClick={() => setScanning(true)}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md"
-      >
-        Scanner QR Code
-      </button>
-
-      {/* CAMERA */}
-      {scanning && (
-        <div className="mt-4 border rounded-md overflow-hidden">
-
-          <Scanner
-            onScan={(result) => {
-              if (result?.[0]?.rawValue) {
-                const text = result[0].rawValue
-
-                let number = text
-
-                if (text.startsWith("ORDER-")) {
-                  number = text.replace("ORDER-", "")
-                }
-
-                updateOrder(number)
-                setScanning(false)
-              }
-            }}
-            onError={(err) => console.log(err)}
-            constraints={{ facingMode: "environment" }}
-            styles={{
-              container: { width: "100%" },
-              video: {
-                width: "100%",
-                height: "300px",
-                objectFit: "cover",
-              },
-            }}
-          />
-
-          <button
-            onClick={() => setScanning(false)}
-            className="w-full bg-red-500 text-white py-2"
-          >
-            Stop
-          </button>
-
-        </div>
-      )}
-
     </div>
   )
 }

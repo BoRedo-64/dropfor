@@ -1,17 +1,14 @@
 import { createClient } from "@/lib/supabase/server"
 
-export async function getPayments() {
+// 🔹 Get all payments (sorted)
+export async function getPayments(userId: string) {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("payments")
     .select("*")
-    .order("created_at", { ascending: false })
+    .eq("user_id", userId)
+    .order("date", { ascending: false })
 
-  if (error) {
-    console.error("Supabase error:", error)
-    return []
-  }
-
-  return data ?? []
+  return data || []
 }

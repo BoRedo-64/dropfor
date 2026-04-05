@@ -75,25 +75,34 @@ export default function AccountLayout({
         setInitials(initials)
       }
 
-      const { data: orders } = await supabase
-        .from("orders")
-        .select("status, payment")
+    // 📦 ORDERS COUNTS
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("status")
 
-      if (!orders) return
+    let pending = 0
+    let returns = 0
+    let check = 0
 
-      let pending = 0
-      let returns = 0
-      let check = 0
-      let payments = 0
+    orders?.forEach((o) => {
+      if (o.status === "en attente") pending++
+      if (o.status === "retour") returns++
+      if (o.status === "a verifier") check++
+    })
 
-      orders.forEach((o) => {
-        if (o.status === "en attente") pending++
-        if (o.status === "retour") returns++
-        if (o.status === "a verifier") check++
-        if (o.payment === "non payé") payments++
-      })
+    // 💰 PAYMENTS COUNT (IMPORTANT FIX)
+    const { count: paymentsCount } = await supabase
+      .from("payments")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "non reçu")
 
-      setCounts({ pending, returns, check, payments })
+    setCounts({
+      pending,
+      returns,
+      check,
+      payments: paymentsCount || 0,
+    })
     }
 
     fetchData()
