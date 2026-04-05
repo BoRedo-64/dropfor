@@ -37,6 +37,7 @@ export function PendingTable({
             <div class="label">
 
               <div class="header">
+                <img src="/logo.png" />
                 <div>EXPÉDITEUR: ${senderName}</div>
                 <div>Commande #: ${order.order_number}</div>
               </div>
