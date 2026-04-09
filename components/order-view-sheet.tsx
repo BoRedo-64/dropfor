@@ -339,7 +339,7 @@ export function OrderViewSheet({
                         }
                       />
                     </FormField>
-                    <FormField label="Total ($)">
+                    <FormField label="Total (TND)">
                       <Input
                         type="number"
                         placeholder="0"
