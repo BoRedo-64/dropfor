@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     } = body
 
     const { error } = await supabase.from("orders").insert({
-      user_id: user.id, // 🔥 IMPORTANT
+      user_id: user.id,
       name,
       number,
       city,
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       nbr_colis,
       total,
       content,
-      status: "pending",
+      status: "en attente",
       payment: "unpaid",
     })
 
