@@ -18,7 +18,12 @@ import {
   CheckCircle,
   RotateCcw,
   AlertTriangle,
+  Menu,
 } from "lucide-react"
+
+import {
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -118,19 +123,39 @@ export default async function AccountPage() {
   const statusData = await getOrdersStatusData()
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="py-6 md:py-12">
       <div className="container mx-auto px-4">
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
+        {/* Mobile Header */}
+        <div className="flex items-center gap-3 mb-6 md:hidden">
+          <SidebarTrigger className="h-10 w-10">
+            <Menu className="h-5 w-5" />
+          </SidebarTrigger>
+
+          <div>
+            <h1 className="text-2xl font-bold leading-none">
+              Tableau de bord
+            </h1>
+
+            <p className="text-sm text-muted-foreground mt-1">
+              Suivez vos commandes
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="mb-8 hidden md:block">
+          <h1 className="text-3xl font-bold mb-2">
+            Tableau de bord
+          </h1>
+
           <p className="text-muted-foreground">
             Suivez vos commandes et performances
           </p>
         </div>
 
         {/* 🎨 COLORED CARDS */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {cards.map((card) => (
             <Card key={card.label} className={card.className}>
               <CardContent className="p-4 flex items-center gap-3">
@@ -138,7 +163,10 @@ export default async function AccountPage() {
                 <card.icon className={`h-6 w-6 ${card.iconColor}`} />
 
                 <div>
-                  <p className="text-2xl font-bold">{card.value}</p>
+                  <p className="text-2xl font-bold">
+                    {card.value}
+                  </p>
+
                   <p className="text-xs opacity-70">
                     {card.label}
                   </p>

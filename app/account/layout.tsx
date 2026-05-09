@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import Link from 'next/link'
@@ -29,6 +29,7 @@ import {
   CheckCircle,
   Truck,
   Megaphone,
+  LogOut,
 } from 'lucide-react'
 
 export default function AccountLayout({
@@ -37,6 +38,7 @@ export default function AccountLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const [userName, setUserName] = useState("User")
   const [initials, setInitials] = useState("U")
@@ -58,7 +60,7 @@ export default function AccountLayout({
 
       if (!user) return
 
-      // 👤 FETCH PROFILE (IMPORTANT FIX)
+      // 👤 FETCH PROFILE
       const { data: profile } = await supabase
         .from("profiles")
         .select("first_name, last_name")
@@ -82,38 +84,47 @@ export default function AccountLayout({
         setInitials(initials)
       }
 
-    // 📦 ORDERS COUNTS
-    const { data: orders } = await supabase
-      .from("orders")
-      .select("status")
+      // 📦 ORDERS COUNTS
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("status")
 
-    let pending = 0
-    let returns = 0
-    let check = 0
+      let pending = 0
+      let returns = 0
+      let check = 0
 
-    orders?.forEach((o) => {
-      if (o.status === "en attente") pending++
-      if (o.status === "retour") returns++
-      if (o.status === "a verifier") check++
-    })
+      orders?.forEach((o) => {
+        if (o.status === "en attente") pending++
+        if (o.status === "retour") returns++
+        if (o.status === "a verifier") check++
+      })
 
-    // 💰 PAYMENTS COUNT (IMPORTANT FIX)
-    const { count: paymentsCount } = await supabase
-      .from("payments")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "non reçu")
+      // 💰 PAYMENTS COUNT
+      const { count: paymentsCount } = await supabase
+        .from("payments")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "non reçu")
 
-    setCounts({
-      pending,
-      returns,
-      check,
-      payments: paymentsCount || 0,
-    })
+      setCounts({
+        pending,
+        returns,
+        check,
+        payments: paymentsCount || 0,
+      })
     }
 
     fetchData()
   }, [])
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+
+    await supabase.auth.signOut()
+
+    router.push("/auth/login")
+    router.refresh()
+  }
 
   const sections = [
     {
@@ -138,7 +149,6 @@ export default function AccountLayout({
       ],
     },
 
-    // ✅ RESTORED SERVICES
     {
       title: "Services",
       items: [
@@ -154,6 +164,7 @@ export default function AccountLayout({
         { title: "Paiement", href: "/account/payments", icon: CreditCard, badge: counts.payments },
       ],
     },
+
     {
       title: "Support",
       items: [
@@ -168,6 +179,7 @@ export default function AccountLayout({
 
         <SidebarHeader>
           <div className="flex items-center gap-4 px-5 py-4">
+
             <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center">
               <Package className="!h-6 !w-6" />
             </div>
@@ -175,6 +187,7 @@ export default function AccountLayout({
             <span className="text-xl font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
               Dropfor
             </span>
+
           </div>
         </SidebarHeader>
 
@@ -188,6 +201,7 @@ export default function AccountLayout({
               </p>
 
               <SidebarMenu>
+
                 {section.items.map((link) => {
                   const isActive = pathname === link.href
                   const Icon = link.icon
@@ -209,6 +223,7 @@ export default function AccountLayout({
 
                           <div className="flex items-center gap-4">
                             <Icon className="!h-5 !w-5" />
+
                             <span className="group-data-[collapsible=icon]:hidden">
                               {link.title}
                             </span>
@@ -227,6 +242,7 @@ export default function AccountLayout({
                     </SidebarMenuItem>
                   )
                 })}
+
               </SidebarMenu>
 
             </div>
@@ -235,20 +251,36 @@ export default function AccountLayout({
         </SidebarContent>
 
         <SidebarFooter className="border-t">
-          <div className="flex items-center gap-3 px-4 py-4">
 
-            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
-              {initials}
+          <div className="flex items-center justify-between gap-3 px-4 py-4">
+
+            <div className="flex items-center gap-3 min-w-0">
+
+              <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold shrink-0">
+                {initials}
+              </div>
+
+              <div className="group-data-[collapsible=icon]:hidden min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {userName}
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  Expéditeur
+                </p>
+              </div>
+
             </div>
 
-            <div className="group-data-[collapsible=icon]:hidden">
-              <p className="text-sm font-medium">{userName}</p>
-              <p className="text-xs text-muted-foreground">
-                Expéditeur
-              </p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="group-data-[collapsible=icon]:hidden h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition"
+            >
+              <LogOut className="h-4 w-4 text-muted-foreground" />
+            </button>
 
           </div>
+
         </SidebarFooter>
 
       </Sidebar>

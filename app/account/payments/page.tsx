@@ -17,8 +17,14 @@ import {
   Package,
   DollarSign,
   Clock,
+  Menu,
 } from "lucide-react"
+
 import Link from "next/link"
+
+import {
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 export default async function PaymentsPage() {
   const supabase = await createClient()
@@ -31,12 +37,11 @@ export default async function PaymentsPage() {
     redirect("/auth/login")
   }
 
-  // 🧠 Generate YESTERDAY payment automatically
+  // Generate YESTERDAY payment automatically
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
 
-
-  // 📊 Fetch payments
+  // Fetch payments
   const payments = await getPayments(user.id)
 
   const totalPaid = payments
@@ -49,107 +54,167 @@ export default async function PaymentsPage() {
 
   const receivedPayments = payments
     .filter((p) => p.status === "reçu")
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
+    )
 
   const lastPayment =
     receivedPayments.length > 0
-      ? new Date(receivedPayments[0].date).toLocaleDateString()
+      ? new Date(receivedPayments[0].date)
+          .toLocaleDateString()
       : "Pas encore"
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="py-6 md:py-12">
       <div className="container mx-auto px-4">
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Payments</h1>
+        {/* Mobile Header */}
+        <div className="flex items-center gap-3 mb-6 md:hidden">
+
+          <SidebarTrigger className="h-10 w-10">
+            <Menu className="h-5 w-5" />
+          </SidebarTrigger>
+
+          <div>
+            <h1 className="text-2xl font-bold leading-none">
+              Payments
+            </h1>
+
+            <p className="text-sm text-muted-foreground mt-1">
+              Track your earnings
+            </p>
+          </div>
+
+        </div>
+
+        {/* Desktop Header */}
+        <div className="mb-8 hidden md:block">
+
+          <h1 className="text-3xl font-bold mb-2">
+            Payments
+          </h1>
+
           <p className="text-muted-foreground">
             Track your payment history and earnings
           </p>
+
         </div>
 
         {/* Summary */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
           <Card>
+
             <CardContent className="p-5 flex items-center gap-4">
+
               <DollarSign className="h-6 w-6 text-primary" />
+
               <div>
                 <p className="text-xl font-bold">
                   {totalPaid.toFixed(2)} TND
                 </p>
+
                 <p className="text-sm text-muted-foreground">
                   Paiements reçus
                 </p>
               </div>
+
             </CardContent>
+
           </Card>
 
           <Card>
+
             <CardContent className="p-5 flex items-center gap-4">
+
               <Clock className="h-6 w-6 text-yellow-500" />
+
               <div>
                 <p className="text-xl font-bold">
                   {pendingPayments.toFixed(2)} TND
                 </p>
+
                 <p className="text-sm text-muted-foreground">
                   Paiements non reçus
                 </p>
               </div>
+
             </CardContent>
+
           </Card>
 
           <Card>
+
             <CardContent className="p-5 flex items-center gap-4">
+
               <CreditCard className="h-6 w-6 text-primary" />
+
               <div>
                 <p className="text-xl font-bold">
                   {lastPayment}
                 </p>
+
                 <p className="text-sm text-muted-foreground">
                   Dernier Paiement
                 </p>
               </div>
+
             </CardContent>
+
           </Card>
 
         </div>
 
         {/* Payments List */}
         <Card>
+
           <CardHeader>
+
             <CardTitle className="flex items-center gap-2">
+
               <CreditCard className="h-5 w-5" />
+
               Payment History
+
             </CardTitle>
 
             <CardDescription>
               Daily calculated payments
             </CardDescription>
+
           </CardHeader>
 
           <CardContent>
+
             {payments.length > 0 ? (
+
               <div className="space-y-4">
 
                 {payments.map((payment) => (
+
                   <Link
                     href={`/account/payments/${payment.id}`}
                     key={payment.id}
-                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition"
+                    className="flex items-center justify-between gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition"
                   >
 
-                    <div>
+                    <div className="min-w-0">
+
                       <p className="font-medium">
-                        {new Date(payment.date).toLocaleDateString()}
+                        {new Date(payment.date)
+                          .toLocaleDateString()}
                       </p>
 
                       <p className="text-sm text-muted-foreground">
-                        {payment.livree_count} livrées • {payment.retour_count} retours
+                        {payment.livree_count} livrées •{" "}
+                        {payment.retour_count} retours
                       </p>
+
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
 
                       <Badge
                         variant={
@@ -163,24 +228,34 @@ export default async function PaymentsPage() {
                       </Badge>
 
                       <p className="text-sm font-medium">
-                        {Number(payment.amount).toFixed(2)} TND
+                        {Number(payment.amount)
+                          .toFixed(2)} TND
                       </p>
 
                     </div>
 
                   </Link>
+
                 ))}
 
               </div>
+
             ) : (
+
               <div className="text-center py-12">
+
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+
                 <p className="text-muted-foreground">
                   No payments yet
                 </p>
+
               </div>
+
             )}
+
           </CardContent>
+
         </Card>
 
       </div>

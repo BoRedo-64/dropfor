@@ -1,14 +1,23 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+
 import {
   Card,
   CardContent,
 } from "@/components/ui/card"
 
-import { Package } from "lucide-react"
+import {
+  Package,
+  Menu,
+} from "lucide-react"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PendingTable } from "@/components/pending-table"
+
+import {
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 export default async function PendingPage({
   searchParams,
@@ -37,14 +46,14 @@ export default async function PendingPage({
   const from = (page - 1) * limit
   const to = from + limit - 1
 
-  //username
+  // username
   const { data: profile } = await supabase
     .from("profiles")
     .select("first_name, last_name")
     .eq("id", user.id)
     .single()
 
-    const senderName = profile
+  const senderName = profile
     ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
     : "Expéditeur"
 
@@ -69,35 +78,71 @@ export default async function PendingPage({
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="py-6 md:py-12">
       <div className="container mx-auto px-4">
 
-        {/* Simple title (not inside card) */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Pending Orders</h1>
+        {/* Mobile Header */}
+        <div className="flex items-center gap-3 mb-6 md:hidden">
+
+          <SidebarTrigger className="h-10 w-10">
+            <Menu className="h-5 w-5" />
+          </SidebarTrigger>
+
+          <div>
+            <h1 className="text-2xl font-bold leading-none">
+              Pending Orders
+            </h1>
+
+            <p className="text-sm text-muted-foreground mt-1">
+              Orders waiting for pickup
+            </p>
+          </div>
+
+        </div>
+
+        {/* Desktop Header */}
+        <div className="mb-6 hidden md:block">
+
+          <h1 className="text-2xl font-bold">
+            Pending Orders
+          </h1>
+
         </div>
 
         <Card>
+
           <CardContent className="pt-6">
 
             {orders && orders.length > 0 ? (
 
-              <PendingTable orders={orders} senderName={senderName} />
+              <div className="overflow-x-auto">
+                <PendingTable
+                  orders={orders}
+                  senderName={senderName}
+                />
+              </div>
 
             ) : (
+
               <div className="text-center py-12">
+
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+
                 <p className="text-muted-foreground">
                   No pending orders
                 </p>
+
               </div>
+
             )}
 
             {/* Pagination */}
             <div className="flex items-center justify-between mt-4">
 
               <Link href={buildPageUrl(Math.max(1, safePage - 1))}>
-                <Button disabled={safePage <= 1}>Previous</Button>
+                <Button disabled={safePage <= 1}>
+                  Previous
+                </Button>
               </Link>
 
               <span className="text-sm">
@@ -105,12 +150,15 @@ export default async function PendingPage({
               </span>
 
               <Link href={buildPageUrl(Math.min(totalPages, safePage + 1))}>
-                <Button disabled={safePage >= totalPages}>Next</Button>
+                <Button disabled={safePage >= totalPages}>
+                  Next
+                </Button>
               </Link>
 
             </div>
 
           </CardContent>
+
         </Card>
 
       </div>
