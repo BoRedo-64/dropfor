@@ -1,11 +1,28 @@
 "use client"
 
 import { useState } from "react"
+
 import { Scanner } from "@yudiel/react-qr-scanner"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Camera, Loader2 } from "lucide-react"
+
+import {
+  Camera,
+  Loader2,
+  Menu,
+} from "lucide-react"
+
+import {
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 export default function StockPage() {
   const [orderNumber, setOrderNumber] = useState("")
@@ -20,7 +37,9 @@ export default function StockPage() {
 
       const res = await fetch("/api/admin/stock", {
         method: "POST",
-        body: JSON.stringify({ order_number: number }),
+        body: JSON.stringify({
+          order_number: number,
+        }),
       })
 
       const data = await res.json()
@@ -42,106 +61,166 @@ export default function StockPage() {
   }
 
   return (
-    <div className="py-10 flex justify-center">
-      <div className="w-full max-w-xl">
+    <div className="py-6 md:py-10 px-4">
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Ajouter au dépôt</CardTitle>
-          </CardHeader>
+      {/* Mobile Header */}
+      <div className="flex items-center gap-3 mb-6 md:hidden">
 
-          <CardContent className="space-y-6">
+        <SidebarTrigger className="h-10 w-10">
+          <Menu className="h-5 w-5" />
+        </SidebarTrigger>
 
-            {/* INPUT */}
-            <div className="space-y-2">
-              <Input
-                placeholder="Numéro de commande"
-                value={orderNumber}
-                onChange={(e) => setOrderNumber(e.target.value)}
-              />
+        <div>
+          <h1 className="text-2xl font-bold leading-none">
+            Stock
+          </h1>
 
-              <Button
-                onClick={() => updateOrder(orderNumber)}
-                className="w-full"
-                disabled={loading}
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Valider
-              </Button>
-            </div>
-
-            {/* CAMERA BUTTON */}
-            <Button
-              onClick={() => setScanning(true)}
-              className="w-full flex items-center gap-2"
-              variant="secondary"
-            >
-              <Camera className="h-5 w-5" />
-              Scanner avec la caméra
-            </Button>
-
-          </CardContent>
-        </Card>
-
-        {/* SCANNER MODAL STYLE */}
-        {scanning && (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-
-            <div className="bg-white rounded-lg overflow-hidden w-full max-w-md">
-
-              <div className="p-4 border-b flex justify-between items-center">
-                <p className="font-medium">Scanner QR Code</p>
-
-                <button
-                  onClick={() => setScanning(false)}
-                  className="text-sm text-muted-foreground"
-                >
-                  Fermer
-                </button>
-              </div>
-
-              <Scanner
-                onScan={(result) => {
-                  if (result?.[0]?.rawValue) {
-                    const text = result[0].rawValue
-
-                    let number = text
-
-                    if (text.startsWith("ORDER-")) {
-                      number = text.replace("ORDER-", "")
-                    }
-
-                    updateOrder(number)
-                    setScanning(false)
-                  }
-                }}
-                onError={(err) => console.log(err)}
-                constraints={{ facingMode: "environment" }}
-                styles={{
-                  container: { width: "100%" },
-                  video: {
-                    width: "100%",
-                    height: "300px",
-                    objectFit: "cover",
-                  },
-                }}
-              />
-
-              <div className="p-4">
-                <Button
-                  onClick={() => setScanning(false)}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  Arrêter
-                </Button>
-              </div>
-
-            </div>
-          </div>
-        )}
+          <p className="text-sm text-muted-foreground mt-1">
+            Ajouter au dépôt
+          </p>
+        </div>
 
       </div>
+
+      <div className="flex justify-center">
+
+        <div className="w-full max-w-xl">
+
+          <Card>
+
+            <CardHeader>
+
+              <CardTitle>
+                Ajouter au dépôt
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+
+              {/* INPUT */}
+              <div className="space-y-2">
+
+                <Input
+                  placeholder="Numéro de commande"
+                  value={orderNumber}
+                  onChange={(e) =>
+                    setOrderNumber(e.target.value)
+                  }
+                />
+
+                <Button
+                  onClick={() => updateOrder(orderNumber)}
+                  className="w-full"
+                  disabled={loading}
+                >
+
+                  {loading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+
+                  Valider
+
+                </Button>
+
+              </div>
+
+              {/* CAMERA BUTTON */}
+              <Button
+                onClick={() => setScanning(true)}
+                className="w-full flex items-center gap-2"
+                variant="secondary"
+              >
+
+                <Camera className="h-5 w-5" />
+
+                Scanner avec la caméra
+
+              </Button>
+
+            </CardContent>
+
+          </Card>
+
+        </div>
+
+      </div>
+
+      {/* SCANNER MODAL */}
+      {scanning && (
+
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+
+          <div className="bg-white rounded-lg overflow-hidden w-full max-w-md">
+
+            <div className="p-4 border-b flex justify-between items-center">
+
+              <p className="font-medium">
+                Scanner QR Code
+              </p>
+
+              <button
+                onClick={() => setScanning(false)}
+                className="text-sm text-muted-foreground"
+              >
+                Fermer
+              </button>
+
+            </div>
+
+            <Scanner
+              onScan={(result) => {
+                if (result?.[0]?.rawValue) {
+                  const text = result[0].rawValue
+
+                  let number = text
+
+                  if (text.startsWith("ORDER-")) {
+                    number = text.replace("ORDER-", "")
+                  }
+
+                  updateOrder(number)
+                  setScanning(false)
+                }
+              }}
+
+              onError={(err) => console.log(err)}
+
+              constraints={{
+                facingMode: "environment",
+              }}
+
+              styles={{
+                container: {
+                  width: "100%",
+                },
+
+                video: {
+                  width: "100%",
+                  height: "300px",
+                  objectFit: "cover",
+                },
+              }}
+            />
+
+            <div className="p-4">
+
+              <Button
+                onClick={() => setScanning(false)}
+                variant="destructive"
+                className="w-full"
+              >
+                Arrêter
+              </Button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
     </div>
   )
 }

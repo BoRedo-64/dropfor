@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import Link from 'next/link'
@@ -23,6 +23,7 @@ import {
   Package,
   Truck,
   PackagePlus,
+  LogOut,
 } from 'lucide-react'
 
 export default function AdminLayout({
@@ -31,11 +32,12 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const [userName, setUserName] = useState("Admin")
   const [initials, setInitials] = useState("A")
 
-  // 🔥 COUNTS
+  // COUNTS
   const [counts, setCounts] = useState({
     pickups: 0,
   })
@@ -50,7 +52,7 @@ export default function AdminLayout({
 
       if (!user) return
 
-      // 👤 NAME
+      // NAME
       const firstName = user.user_metadata?.first_name || ""
       const lastName = user.user_metadata?.last_name || ""
 
@@ -68,7 +70,7 @@ export default function AdminLayout({
         setInitials(initials)
       }
 
-      // 🔥 PICKUPS COUNT (pending only)
+      // PICKUPS COUNT
       const { data: pickups } = await supabase
         .from("pickups")
         .select("status")
@@ -84,6 +86,15 @@ export default function AdminLayout({
 
     fetchData()
   }, [])
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+
+    await supabase.auth.signOut()
+
+    router.push("/auth/login")
+    router.refresh()
+  }
 
   const sections = [
     {
@@ -101,7 +112,7 @@ export default function AdminLayout({
           title: "Pickups",
           href: "/admin/pickups",
           icon: Truck,
-          badge: counts.pickups, // 🔴 ALERT
+          badge: counts.pickups,
         },
       ],
     },
@@ -113,7 +124,9 @@ export default function AdminLayout({
 
         {/* HEADER */}
         <SidebarHeader>
+
           <div className="flex items-center gap-4 px-5 py-4">
+
             <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center">
               <Package className="!h-6 !w-6" />
             </div>
@@ -121,7 +134,9 @@ export default function AdminLayout({
             <span className="text-xl font-semibold hidden md:inline group-data-[collapsible=icon]:hidden">
               Dropfor Admin
             </span>
+
           </div>
+
         </SidebarHeader>
 
         {/* CONTENT */}
@@ -135,6 +150,7 @@ export default function AdminLayout({
               </p>
 
               <SidebarMenu>
+
                 {section.items.map((link) => {
                   const isActive = pathname === link.href
                   const Icon = link.icon
@@ -156,13 +172,16 @@ export default function AdminLayout({
 
                           {/* LEFT */}
                           <div className="flex items-center gap-4">
+
                             <Icon className="!h-5 !w-5" />
+
                             <span className="group-data-[collapsible=icon]:hidden">
                               {link.title}
                             </span>
+
                           </div>
 
-                          {/* 🔴 BADGE */}
+                          {/* BADGE */}
                           {link.badge > 0 && (
                             <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
                               {link.badge}
@@ -176,6 +195,7 @@ export default function AdminLayout({
                     </SidebarMenuItem>
                   )
                 })}
+
               </SidebarMenu>
 
             </div>
@@ -185,29 +205,51 @@ export default function AdminLayout({
 
         {/* FOOTER */}
         <SidebarFooter className="border-t">
-          <div className="flex items-center gap-3 px-4 py-4">
 
-            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
-              {initials}
+          <div className="flex items-center justify-between gap-3 px-4 py-4">
+
+            <div className="flex items-center gap-3 min-w-0">
+
+              <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-semibold shrink-0">
+                {initials}
+              </div>
+
+              <div className="group-data-[collapsible=icon]:hidden min-w-0">
+
+                <p className="text-sm font-medium truncate">
+                  {userName}
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  Administrateur
+                </p>
+
+              </div>
+
             </div>
 
-            <div className="group-data-[collapsible=icon]:hidden">
-              <p className="text-sm font-medium">{userName}</p>
-              <p className="text-xs text-muted-foreground">
-                Administrateur
-              </p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="group-data-[collapsible=icon]:hidden h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition"
+            >
+
+              <LogOut className="h-4 w-4 text-muted-foreground" />
+
+            </button>
 
           </div>
+
         </SidebarFooter>
 
       </Sidebar>
 
       {/* PAGE */}
       <SidebarInset>
+
         <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
+
       </SidebarInset>
 
     </SidebarProvider>
