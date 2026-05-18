@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/cosmos-sync",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
