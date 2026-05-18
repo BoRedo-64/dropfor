@@ -30,6 +30,7 @@ import { OrdersFilters } from "@/components/orders-filters"
 import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { DeleteOrderButton } from "@/components/delete-order-button"
 
 export default async function OrdersPage({
   searchParams,
@@ -341,10 +342,18 @@ export default async function OrdersPage({
                             <div className="flex items-center gap-3">
 
                               <OrderViewSheet mode="view" order={order}>
-                                <button className="text-muted-foreground hover:text-primary h-6 w-6">
+
+                                <div className="text-muted-foreground hover:text-primary h-6 w-6 flex items-center justify-center cursor-pointer">
                                   <Eye className="h-4 w-4" />
-                                </button>
+                                </div>
+
                               </OrderViewSheet>
+
+                              {order.status === "en attente" && (
+                                <DeleteOrderButton
+                                  orderId={order.id}
+                                />
+                              )}
 
                             </div>
 
