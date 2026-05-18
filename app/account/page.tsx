@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import {
+  syncCosmosOrders,
+} from "@/lib/integrations/cosmos-sync"
 
 import {
   Card,
@@ -27,6 +30,7 @@ import {
 
 export default async function AccountPage() {
   const supabase = await createClient()
+  await syncCosmosOrders()
 
   const {
     data: { user },
